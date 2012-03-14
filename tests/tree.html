@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport"
+		  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, target-densitydpi=device-dpi"/>
+
+	<style>
+		html, body {
+			overflow: hidden;
+			width: 100%;
+			height: 100%;
+			margin:0;
+			padding:0;
+			border: 0;
+		}
+
+	</style>
+	<script src="../js/utils.js"></script>
+	<script src="../js/behaviortree/BehaviorTreeNode.js"></script>
+	<script src="../js/behaviortree/NumericDecisionNode.js"></script>
+	<script src="../js/behaviortree/ProbabilisticDecisionNode.js"></script>
+
+	<script>
+		var agent = new Agent();
+
+		function Agent() {
+			this.hunger = 0;
+			this.energy = 100;
+		}
+
+		/**
+		 * Eat - reduce hunger
+		 */
+		function EatAction() { }
+		EatAction.prototype.execute = function(agent) {
+			console.log("Decided to eat");
+			agent.hunger -= Math.floor(Math.random()*30) + 10;
+			if (agent.hunger < 0) {
+				agent.hunger = 0;
+			}
+		};
+
+		/**
+		 * Sleep - increase energy
+		 */
+		function SleepAction() {}
+		SleepAction.prototype.execute = function(agent) {
+			console.log("Decided to sleep");
+			agent.energy += 10;
+			if (agent.energy > 100) {
+				agent.energy = 100;
+			}
+		};
+
+		/**
+		 * Do nothing
+		 */
+		function WanderAroundAction() {}
+		WanderAroundAction.prototype.execute = function(agent) {
+			console.log("Wandering around...")
+		};
+
+		/**
+		 * Initialize the tree
+		 */
+		function buildDecisionTree() {
+			var wander = new WanderAroundAction();
+			var sleep = new SleepAction();
+			var eat = new EatAction();
+
+			return new NumericDecisionNode("hunger", 50,
+				new NumericDecisionNode("energy", 30,
+					sleep,
+					wander),
+				new ProbabilisticDecisionNode(0.3,
+						eat,
+						new NumericDecisionNode("energy", 30,
+								sleep,
+								wander)));
+		}
+
+		function init() {
+			updateWorld();
+		}
+
+		function updateWorld() {
+			agent.hunger += Math.floor(Math.random()*10) + 5;
+			agent.energy -= Math.floor(Math.random()*5) + 3;
+
+			console.log("hunger = " + agent.hunger + " energy = " + agent.energy);
+			var tree = buildDecisionTree();
+			tree.execute(agent);
+			setTimeout(arguments.callee, 1000);
+		}
+
+	</script>
+</head>
+<body onload="init()">
+Look at console.
+<canvas id="mainCanvas" width="20px" height="20px"></canvas>
+</body>
+</html>
