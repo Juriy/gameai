@@ -1,23 +1,213 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-	<meta charset="utf-8" />
-	<meta name="viewport"
-		  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, target-densitydpi=device-dpi"/>
-
-	<style>
-		html, body {
-			overflow: hidden;
-			width: 100%;
-			height: 100%;
-			margin:0;
-			padding:0;
-			border: 0;
+	<title>Test</title>
+	
+	<script src="js/utils.js"></script>
+	<script src="js/gl-matrix.js"></script>
+	
+	<script src="js/Agent.js"></script>
+	<script src="js/Obstacle.js"></script>
+	<script src="js/Marker.js"></script>
+	<script src="js/MoveToBehavior.js"></script>
+	
+	<script>
+	
+		function sign(number) {
+			return number > 0 ? 1 : number == 0 ? 0 : -1;
+		}
+		
+		function copy(v) {
+			return [v[0], v[1]];
+		}
+	
+		function normalize(vec) {
+			setLength(vec, 1);
+		}
+		
+		function length(vec) {
+			return Math.sqrt(vec[0]*vec[0] + vec[1]*vec[1]);
+		}
+		
+		function divide(vec, scalar) {
+			vec[0] /= scalar;
+			vec[1] /= scalar;
 		}
 
-	</style>
+		function multiply(vec, scalar) {
+			vec[0] *= scalar;
+			vec[1] *= scalar;
+		}
+		
+		function setLength(vec, len) {
+			if (!(vec[0] || vec[1])) {
+				return;
+			}
+			var curLen = length(vec);
+			var c = len/curLen;
+			multiply(vec, c);
+		}
+		
+		function trim(v, max) {
+			if (length(v) > max) {
+				setLength(v, max);
+			}
+		}
+		
+		function LookAtBehavior(x, y) {
+			this.dest = vec2.createFrom(x, y);
+		}
+		
+		_p = LookAtBehavior.prototype;
+		
+		_p.applyToAgent = function(time, agent) {
+			var acceptDistance = 0.01;
+			var rotationSpeed = 0.002;
+			
+			//debugger;
+			var targetAngle = vec2.subtract(this.dest, agent.pos, vec2.create());
+			var targetOrientation = Math.atan2(-targetAngle[0], targetAngle[1]) + Math.PI/2;
+			
+			var deltaOrientation = targetOrientation - agent.orientation;
+			
+			while (deltaOrientation > Math.PI) {
+				deltaOrientation -= Math.PI*2;
+			}
+			while (deltaOrientation < -Math.PI) {
+				deltaOrientation += Math.PI*2;
+			}
+			
+			//console.log(deltaOrientation + "|" + targetOrientation);
+			
+			var rot = sign(deltaOrientation)*Math.min(rotationSpeed, Math.abs(deltaOrientation));
+			
+			
+			var done = false;
+			if (Math.abs(rot*time) > Math.abs(deltaOrientation)) {
+				rot = deltaOrientation/time;
+				done = true;
+			}
+			
+			agent.orientation += rot*time;
+			
+			return done;
+		};
+		
+		function BehaviorManager(agent) {
+			this.behaviors = [];
+			this.current = 0;
+			this.agent = agent;
+		}
+		
+		_p = BehaviorManager.prototype;
+		
+		_p.add = function (behavior) {
+			this.behaviors.push(behavior);
+		};
+		
+		_p.update = function (time) {
+			if (this.behaviors[this.current]) {
+				var behavior = this.behaviors[this.current];
+				if (behavior.applyToAgent(time, this.agent)) {
+					agent.stop();
+					this.current++;
+				}
+			}
+		}
+	</script>
+	
+	<script>
+		var canvas;
+		var ctx;
+		var lastUpdate = Date.now();
+		
+		var agent = new Agent();
+		var marker = new Marker(150, 300);
+		var obstacle = new Obstacle([
+			[100, 100],
+			[70, 140],
+			[130, 140]
+		]);
+		
+		var bManager = new BehaviorManager(agent);
+		
+		// bManager.add(new LookAtBehavior(marker.x, marker.y));
+		bManager.add(new LookAtBehavior(marker.x, marker.y));
+		bManager.add(new MoveToBehavior(marker.x, marker.y));
+		bManager.add(new LookAtBehavior(150, 100));
+		bManager.add(new MoveToBehavior(150, 100));
+		
+		
+		function init() {
+			canvas = document.getElementById("mainCanvas");
+			ctx = canvas.getContext("2d");
+			animate();
+		}
+		
+		function animate() {
+			var time = Date.now() - lastUpdate;
+			lastUpdate = Date.now();
+			requestAnimationFrame(arguments.callee);
+			
+			update(time);
+			drawFrame(time);
+		}
+		
+		function update(time) {
+			bManager.update(time);
+			//behavior.applyToAgent(time, agent);
+			agent.update(time);
+		}
+		
+		function drawFrame() {
+			drawGrid(ctx);
+			marker.draw(ctx);
+			agent.draw(ctx);
+			// obstacle.draw(ctx);
+			
+			/*
+			ctx.beginPath(); // 
+			ctx.arc(100, 100, 50, 0, Math.PI/4, false);
+			ctx.lineTo(100, 100);
+			ctx.closePath();
+			ctx.fill(); */
+		}
+		
+		function drawGrid(ctx) {
+			ctx.fillStyle = "white";
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			
+			var cellSize = 25;
+			
+			ctx.beginPath();
+			for (var i = 0; i < canvas.width/cellSize; i++) {
+				ctx.moveTo(i*cellSize + 0.5, 0);
+				ctx.lineTo(i*cellSize + 0.5, canvas.height);
+			}
+
+			for (var j = 0; j < canvas.height/cellSize; j++) {
+				ctx.moveTo(0, j*cellSize + .5);
+				ctx.lineTo(canvas.width, j*cellSize + .5);
+			}
+
+			for (var i = 0; i <= canvas.width/cellSize; i += 5) {
+				ctx.moveTo(i*cellSize, 0);
+				ctx.lineTo(i*cellSize, canvas.height);
+			}
+
+			for (var j = 0; j <= canvas.height/cellSize; j+= 5) {
+				ctx.moveTo(0, j*cellSize);
+				ctx.lineTo(canvas.width, j*cellSize);
+			}
+
+			ctx.strokeStyle = "lightblue";
+			ctx.stroke();
+		}
+		
+	</script>
 </head>
-<body>
-	<a href="tests/tree.html">Behavior tree (console version)</a>
+
+<body onload="init()">
+	<canvas id="mainCanvas" width="625" height="500"></canvas>
 </body>
-</html>
+</html> 
