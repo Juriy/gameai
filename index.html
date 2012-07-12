@@ -2,8 +2,16 @@
 <html>
 <head>
 	<title>Test</title>
-	
+
 	<script src="js/utils.js"></script>
+
+	<script src="js/EventEmitter.js"></script>
+
+	<script src="js/input/InputHandlerBase.js"></script>
+	<script src="js/input/MouseInputHandler.js"></script>
+	<script src="js/input/TouchInputHandler.js"></script>
+	<script src="js/input/InputHandler.js"></script>
+
 	<script src="js/gl-matrix.js"></script>
 	
 	<script src="js/Agent.js"></script>
@@ -122,7 +130,14 @@
 		var lastUpdate = Date.now();
 		
 		var agent = new Agent();
-		var marker = new Marker(150, 300);
+
+		var markers = [
+			new Marker(150, 300),
+			new Marker(150, 100)
+		];
+
+		var input;
+
 		var obstacle = new Obstacle([
 			[100, 100],
 			[70, 140],
@@ -132,14 +147,20 @@
 		var bManager = new BehaviorManager(agent);
 		
 		// bManager.add(new LookAtBehavior(marker.x, marker.y));
-		bManager.add(new LookAtBehavior(marker.x, marker.y));
-		bManager.add(new MoveToBehavior(marker.x, marker.y));
-		bManager.add(new LookAtBehavior(150, 100));
-		bManager.add(new MoveToBehavior(150, 100));
-		
+		bManager.add(new LookAtBehavior(markers[0].x, markers[0].y));
+		bManager.add(new MoveToBehavior(markers[0].x, markers[0].y));
+		bManager.add(new LookAtBehavior(markers[1].x, markers[1].y));
+		bManager.add(new MoveToBehavior(markers[1].x, markers[1].y));
+
 		
 		function init() {
 			canvas = document.getElementById("mainCanvas");
+			input = new InputHandler(canvas);
+			input.on("down", function(e) {
+				markers.push(new Marker(e.x, e.y));
+				bManager.add(new LookAtBehavior(e.x, e.y));
+				bManager.add(new MoveToBehavior(e.x, e.y));
+			});
 			ctx = canvas.getContext("2d");
 			animate();
 		}
@@ -161,7 +182,10 @@
 		
 		function drawFrame() {
 			drawGrid(ctx);
-			marker.draw(ctx);
+
+			for (var i = 0; i < markers.length; i++) {
+				markers[i].draw(ctx);
+			}
 			agent.draw(ctx);
 			// obstacle.draw(ctx);
 			
