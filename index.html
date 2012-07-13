@@ -17,110 +17,18 @@
 	<script src="js/Agent.js"></script>
 	<script src="js/Obstacle.js"></script>
 	<script src="js/Marker.js"></script>
-	<script src="js/MoveToBehavior.js"></script>
-	
+
+	<script src="js/beh/MoveToBehavior.js"></script>
+	<script src="js/beh/LookAtBehavior.js"></script>
+	<script src="js/beh/SteeringMoveToBehavior.js"></script>
+	<script src="js/beh/SteeringLookAtBehavior.js"></script>
+
+	<script src="js/beh/BehaviorManager.js"></script>
+
 	<script>
 	
 		function sign(number) {
 			return number > 0 ? 1 : number == 0 ? 0 : -1;
-		}
-		
-		function copy(v) {
-			return [v[0], v[1]];
-		}
-	
-		function normalize(vec) {
-			setLength(vec, 1);
-		}
-		
-		function length(vec) {
-			return Math.sqrt(vec[0]*vec[0] + vec[1]*vec[1]);
-		}
-		
-		function divide(vec, scalar) {
-			vec[0] /= scalar;
-			vec[1] /= scalar;
-		}
-
-		function multiply(vec, scalar) {
-			vec[0] *= scalar;
-			vec[1] *= scalar;
-		}
-		
-		function setLength(vec, len) {
-			if (!(vec[0] || vec[1])) {
-				return;
-			}
-			var curLen = length(vec);
-			var c = len/curLen;
-			multiply(vec, c);
-		}
-		
-		function trim(v, max) {
-			if (length(v) > max) {
-				setLength(v, max);
-			}
-		}
-		
-		function LookAtBehavior(x, y) {
-			this.dest = vec2.createFrom(x, y);
-		}
-		
-		_p = LookAtBehavior.prototype;
-		
-		_p.applyToAgent = function(time, agent) {
-			var acceptDistance = 0.01;
-			var rotationSpeed = 0.002;
-			
-			//debugger;
-			var targetAngle = vec2.subtract(this.dest, agent.pos, vec2.create());
-			var targetOrientation = Math.atan2(-targetAngle[0], targetAngle[1]) + Math.PI/2;
-			
-			var deltaOrientation = targetOrientation - agent.orientation;
-			
-			while (deltaOrientation > Math.PI) {
-				deltaOrientation -= Math.PI*2;
-			}
-			while (deltaOrientation < -Math.PI) {
-				deltaOrientation += Math.PI*2;
-			}
-			
-			//console.log(deltaOrientation + "|" + targetOrientation);
-			
-			var rot = sign(deltaOrientation)*Math.min(rotationSpeed, Math.abs(deltaOrientation));
-			
-			
-			var done = false;
-			if (Math.abs(rot*time) > Math.abs(deltaOrientation)) {
-				rot = deltaOrientation/time;
-				done = true;
-			}
-			
-			agent.orientation += rot*time;
-			
-			return done;
-		};
-		
-		function BehaviorManager(agent) {
-			this.behaviors = [];
-			this.current = 0;
-			this.agent = agent;
-		}
-		
-		_p = BehaviorManager.prototype;
-		
-		_p.add = function (behavior) {
-			this.behaviors.push(behavior);
-		};
-		
-		_p.update = function (time) {
-			if (this.behaviors[this.current]) {
-				var behavior = this.behaviors[this.current];
-				if (behavior.applyToAgent(time, this.agent)) {
-					agent.stop();
-					this.current++;
-				}
-			}
 		}
 	</script>
 	
@@ -147,10 +55,10 @@
 		var bManager = new BehaviorManager(agent);
 		
 		// bManager.add(new LookAtBehavior(marker.x, marker.y));
-		bManager.add(new LookAtBehavior(markers[0].x, markers[0].y));
-		bManager.add(new MoveToBehavior(markers[0].x, markers[0].y));
-		bManager.add(new LookAtBehavior(markers[1].x, markers[1].y));
-		bManager.add(new MoveToBehavior(markers[1].x, markers[1].y));
+		bManager.add(new SteeringLookAtBehavior(markers[0].x, markers[0].y));
+		bManager.add(new SteeringMoveToBehavior(markers[0].x, markers[0].y));
+		bManager.add(new SteeringLookAtBehavior(markers[1].x, markers[1].y));
+		bManager.add(new SteeringMoveToBehavior(markers[1].x, markers[1].y));
 
 		
 		function init() {
@@ -159,7 +67,7 @@
 			input.on("down", function(e) {
 				markers.push(new Marker(e.x, e.y));
 				bManager.add(new LookAtBehavior(e.x, e.y));
-				bManager.add(new MoveToBehavior(e.x, e.y));
+				bManager.add(new SteeringMoveToBehavior(e.x, e.y));
 			});
 			ctx = canvas.getContext("2d");
 			animate();
