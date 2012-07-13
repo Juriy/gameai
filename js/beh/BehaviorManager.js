@@ -10,7 +10,21 @@ _p.add = function (behavior) {
     this.behaviors.push(behavior);
 };
 
+_p.reset = function() {
+    this.behaviors = [];
+    this.current = 0;
+};
+
 _p.update = function (time) {
+    for (var i = 0; i < this.behaviors.length; i++) {
+        var behavior = this.behaviors[i];
+        if (behavior) {
+            if (behavior.applyToAgent(time, this.agent)) {
+                this.behaviors[i] = null;
+            }
+        }
+    }
+/*
     if (this.behaviors[this.current]) {
         var behavior = this.behaviors[this.current];
         if (behavior.applyToAgent(time, this.agent)) {
@@ -18,4 +32,5 @@ _p.update = function (time) {
             this.current++;
         }
     }
+*/
 };

@@ -1,7 +1,7 @@
 function Agent() {
 	this.color = "darkgreen";
-	this.pos = [100, 100];
-	this.orientation = -Math.PI;
+	this.pos = [300, 100];
+	this.orientation = Math.PI/2;
 
     this.linearSteering = vec2.create();
     this.angularSteering = 0;
@@ -10,7 +10,7 @@ function Agent() {
 
 	this.rotation = 0;
 	
-	this.maxLinearVelocity = 0.25;
+	this.maxLinearVelocity = 0.025;
 	this.maxLinearSteering = 0.002;
 	
 	this.maxAngularVelocity = 0.5;
@@ -90,9 +90,9 @@ _p.update = function(time) {
     }
 
     // Look where you're going
-	if (this.velocity[0] || this.velocity[1]) {
-		this.orientation = Math.atan2(-this.velocity[0], this.velocity[1]) + Math.PI/2;
-	}
+	//if (this.velocity[0] || this.velocity[1]) {
+	//	this.orientation = Math.atan2(-this.velocity[0], this.velocity[1]) + Math.PI/2;
+	//}
 };
 
 _p.stop = function() {
