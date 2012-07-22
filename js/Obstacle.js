@@ -1,9 +1,14 @@
 function Obstacle(points) {
 	this._points = points;
+    this._drawBoundingRect = false;
     this._boundingRect = MathUtils.getBoundingRectangle(points);
 }
 
 _p = Obstacle.prototype;
+
+_p.setDrawBoundingRect = function(drawBoundingRect) {
+    this._drawBoundingRect = drawBoundingRect;
+};
 
 _p.draw = function(ctx) {
 	ctx.save();
@@ -22,8 +27,10 @@ _p.draw = function(ctx) {
 	
 	this._fillLines(ctx);
 
-    ctx.fillStyle = "rgba(99, 99, 99, 0.3)";
-    ctx.fillRect(this._boundingRect.x, this._boundingRect.y, this._boundingRect.width, this._boundingRect.height);
+    if (this._drawBoundingRect) {
+        ctx.fillStyle = "rgba(99, 99, 99, 0.3)";
+        ctx.fillRect(this._boundingRect.x, this._boundingRect.y, this._boundingRect.width, this._boundingRect.height);
+    }
 };
 
 
@@ -60,7 +67,6 @@ _p._fillLines = function(ctx) {
 	}
 	ctx.closePath();
 	ctx.clip();
-
 	
 	var linesOffset = (maxY-minY)/Math.tan(angle);
 	

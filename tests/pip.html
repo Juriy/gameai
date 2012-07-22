@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Test</title>
+
+	<script src="../js/utils.js"></script>
+
+	<script src="../js/EventEmitter.js"></script>
+
+	<script src="../js/input/InputHandlerBase.js"></script>
+	<script src="../js/input/MouseInputHandler.js"></script>
+	<script src="../js/input/TouchInputHandler.js"></script>
+	<script src="../js/input/InputHandler.js"></script>
+
+	<script src="../js/gl-matrix.js"></script>
+
+	<script src="../js/Agent.js"></script>
+	<script src="../js/Obstacle.js"></script>
+	<script src="../js/Marker.js"></script>
+	<script src="../js/RadiusMarker.js"></script>
+
+	<script src="../js/beh/MoveToBehavior.js"></script>
+	<script src="../js/beh/LookAtBehavior.js"></script>
+	<script src="../js/beh/SteeringMoveToBehavior.js"></script>
+	<script src="../js/beh/SteeringLookAtBehavior.js"></script>
+	<script src="../js/beh/WanderBehavior.js"></script>
+
+	<script src="../js/beh/BehaviorManager.js"></script>
+	<script src="../js/Rect.js"></script>
+	<script src="../js/MathUtils.js"></script>
+	<script src="../js/ui/Grid.js"></script>
+
+	<script>
+
+		function sign(number) {
+			return number > 0 ? 1 : number == 0 ? 0 : -1;
+		}
+	</script>
+
+	<script>
+		var MODE_OBSTACLES = 0;
+		var MODE_POINTS = 1;
+
+		var mode = MODE_OBSTACLES;
+
+		var canvas;
+		var ctx;
+		var lastUpdate = Date.now();
+
+		var agent = new Agent();
+
+		var markers = [];
+
+		var input;
+
+		var currentPoints = [];
+		var obstacles = [];
+
+		var bManager = new BehaviorManager(agent);
+
+		function init() {
+			canvas = document.getElementById("mainCanvas");
+			input = new InputHandler(canvas);
+			input.on("down", function(e) {
+				if (mode == MODE_POINTS) {
+					markers.push(new Marker(e.x, e.y, collidesWithObstacle(e.x, e.y) ? Marker.RED : Marker.GREEN));
+				} else {
+					markers.push(new Marker(e.x, e.y));
+				}
+				currentPoints.push([e.x, e.y]);
+			});
+
+			ctx = canvas.getContext("2d");
+			animate();
+		}
+
+		function collidesWithObstacle(x, y) {
+			for (var i = 0; i < obstacles.length; i++) {
+				if (obstacles[i].hasPoint(x, y))
+					return true;
+			}
+			return false;
+		}
+
+		function animate() {
+			var time = Date.now() - lastUpdate;
+			lastUpdate = Date.now();
+			requestAnimationFrame(arguments.callee);
+
+			update(time);
+			drawFrame();
+		}
+
+		function update(time) {
+			agent.update(time);
+		}
+
+		function drawFrame() {
+			drawGrid(ctx);
+
+			for (var i = 0; i < markers.length; i++) {
+				markers[i].draw(ctx);
+			}
+			agent.draw(ctx);
+
+			obstacles.forEach(function(item) {
+				item.draw(ctx);
+			});
+
+		}
+
+		function drawGrid(ctx) {
+			ctx.fillStyle = "white";
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			Grid.draw(ctx, canvas.width, canvas.height);
+		}
+
+		function newObstacle() {
+			if (currentPoints.length > 2)
+				obstacles.push(new Obstacle(currentPoints));
+			currentPoints = [];
+			markers = [];
+		}
+
+		function switchToPoints() {
+			newObstacle();
+			mode = MODE_POINTS;
+		}
+
+		function saveMap() {
+
+		}
+	</script>
+</head>
+
+<body onload="init()" >
+<div style="float: left; margin-right: 20px">
+	<input type="button" value="New Obstacle" style="float: left;" onclick="newObstacle()"/><br/>
+	<input type="button" value="Start Testing Points" style="float: left;" onclick="switchToPoints()"/><br/>
+	<input type="button" value="Save Map" style="float: left;" onclick="saveMap()"/>
+</div>
+<canvas id="mainCanvas" width="625" height="500"></canvas>
+</body>
+</html>
