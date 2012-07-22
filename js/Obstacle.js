@@ -1,5 +1,6 @@
 function Obstacle(points) {
-	this.points = points;
+	this._points = points;
+    this._boundingRect = MathUtils.getBoundingRectangle(points);
 }
 
 _p = Obstacle.prototype;
@@ -10,9 +11,9 @@ _p.draw = function(ctx) {
 	ctx.fillStyle = "rgba(173, 216, 230, 0.65)";
 	ctx.lineWidth = 3;
 	ctx.beginPath();
-	ctx.moveTo(this.points[0][0], this.points[0][1]);
-	for (var i = 1; i < this.points.length; i++) {
-		ctx.lineTo(this.points[i][0], this.points[i][1]);
+	ctx.moveTo(this._points[0][0], this._points[0][1]);
+	for (var i = 1; i < this._points.length; i++) {
+		ctx.lineTo(this._points[i][0], this._points[i][1]);
 	}
 	ctx.closePath();
 	ctx.fill();
@@ -20,6 +21,9 @@ _p.draw = function(ctx) {
 	ctx.restore();
 	
 	this._fillLines(ctx);
+
+    ctx.fillStyle = "rgba(99, 99, 99, 0.3)";
+    ctx.fillRect(this._boundingRect.x, this._boundingRect.y, this._boundingRect.width, this._boundingRect.height);
 };
 
 
@@ -36,9 +40,9 @@ _p._fillLines = function(ctx) {
 	
 	var angle = Math.PI/4;
 	
-	var points = this.points;
-	for (var i = 0; i < this.points.length; i++) {
-		if (this.points[i][0] < minX)
+	var points = this._points;
+	for (var i = 0; i < this._points.length; i++) {
+		if (this._points[i][0] < minX)
 			minX = points[i][0];
 		if (points[i][1] < minY)
 			minY = points[i][1];
@@ -50,9 +54,9 @@ _p._fillLines = function(ctx) {
 	}
 	
 	ctx.beginPath();
-	ctx.moveTo(this.points[0][0], this.points[0][1]);
-	for (var i = 1; i < this.points.length; i++) {
-		ctx.lineTo(this.points[i][0], this.points[i][1]);
+	ctx.moveTo(this._points[0][0], this._points[0][1]);
+	for (i = 1; i < this._points.length; i++) {
+		ctx.lineTo(this._points[i][0], this._points[i][1]);
 	}
 	ctx.closePath();
 	ctx.clip();
@@ -61,7 +65,7 @@ _p._fillLines = function(ctx) {
 	var linesOffset = (maxY-minY)/Math.tan(angle);
 	
 	ctx.beginPath();
-	for (var i = minX - linesOffset; i < maxX; i += 7) {
+	for (i = minX - linesOffset; i < maxX; i += 7) {
 		ctx.moveTo(i, maxY);
 		ctx.lineTo(i + linesOffset, minY);
 	}
@@ -72,4 +76,9 @@ _p._fillLines = function(ctx) {
 
 _p.update = function(time) {
 
+};
+
+_p.hasPoint = function(x, y) {
+    return this._boundingRect.containsPoint(x, y) &&
+        MathUtils.pointInsidePolygon(x, y, this._points, this._boundingRect.x + this._boundingRect.width, y);
 };

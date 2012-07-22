@@ -18,13 +18,8 @@ _p.applyToAgent = function(time, agent) {
     var wanderCircleCenter = [agent.pos[0] + this.wanderOffset*Math.cos(agent.orientation),
         agent.pos[1] + this.wanderOffset*Math.sin(agent.orientation)];
 
-    markers[0] = RadiusMarker.green(wanderCircleCenter[0], wanderCircleCenter[1], this.wanderRadius);
-
-    wanderMarker.x = wanderCircleCenter[0];
-    wanderMarker.y = wanderCircleCenter[1];
-
     agent.stop();
-
+    markers[0] = RadiusMarker.green(wanderCircleCenter[0], wanderCircleCenter[1], this.wanderRadius);
 
     var steeringMove = new SteeringMoveToBehavior(
         wanderCircleCenter[0] + this.wanderRadius*Math.cos(wanderOrientation),

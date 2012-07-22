@@ -4,6 +4,8 @@ function Marker(x, y, color) {
     this._color = color || "#9AC0CD";
 }
 
+
+
 _p = Marker.prototype;
 
 _p.draw = function(ctx) {
@@ -22,14 +24,22 @@ _p.update = function(time) {
 	
 };
 
+Marker.RED = "#EEA2AD";
+Marker.GREEN = "#A2CD5A";
+Marker.BLUE = "#9AC0CD";
+
+Marker.drawAt = function(ctx, x, y, color) {
+    new Marker(x, y, color).draw(ctx);
+};
+
 Marker.blue = function(x, y) {
-    return new Marker(x, y, "#9AC0CD");
+    return new Marker(x, y, Marker.BLUE);
 };
 
 Marker.red = function(x, y) {
-    return new Marker(x, y, "#EEA2AD");
+    return new Marker(x, y, Marker.RED);
 };
 
 Marker.green = function(x, y) {
-    return new Marker(x, y, "#A2CD5A");
+    return new Marker(x, y, Marker.GREEN);
 };

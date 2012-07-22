@@ -23,7 +23,7 @@ _p.applyToAgent = function(time, agent) {
 
     //console.log(deltaOrientation + "|" + targetOrientation);
 
-    var rot = sign(deltaOrientation)*Math.min(rotationSpeed, Math.abs(deltaOrientation));
+    var rot = MathUtils.sign(deltaOrientation)*Math.min(rotationSpeed, Math.abs(deltaOrientation));
 
 
     var done = false;

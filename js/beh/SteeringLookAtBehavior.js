@@ -42,7 +42,5 @@ _p.applyToAgent = function(time, agent) {
     targetRotation *= rotation / rotationSize;
     var steering = (targetRotation - agent.rotation)/this.timeToTarget;
 
-
-
     agent.setAngularSteering(steering);
 };

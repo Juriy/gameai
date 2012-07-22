@@ -12,5 +12,5 @@ _p.applyToAgent = function(time, agent) {
 
     vec2.scale(velocity, 1/time);
     agent.setVelocity(velocity);
-    return length(distance) < this.acceptRadius;
+    return vec2.length(distance) < this.acceptRadius;
 };

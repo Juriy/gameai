@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Test</title>
+
+	<script src="../js/utils.js"></script>
+
+	<script src="../js/EventEmitter.js"></script>
+
+	<script src="../js/input/InputHandlerBase.js"></script>
+	<script src="../js/input/MouseInputHandler.js"></script>
+	<script src="../js/input/TouchInputHandler.js"></script>
+	<script src="../js/input/InputHandler.js"></script>
+
+	<script src="../js/gl-matrix.js"></script>
+
+	<script src="../js/Agent.js"></script>
+	<script src="../js/Obstacle.js"></script>
+	<script src="../js/Marker.js"></script>
+	<script src="../js/RadiusMarker.js"></script>
+
+	<script src="../js/beh/MoveToBehavior.js"></script>
+	<script src="../js/beh/LookAtBehavior.js"></script>
+	<script src="../js/beh/SteeringMoveToBehavior.js"></script>
+	<script src="../js/beh/SteeringLookAtBehavior.js"></script>
+	<script src="../js/beh/WanderBehavior.js"></script>
+
+	<script src="../js/beh/BehaviorManager.js"></script>
+	<script src="../js/Rect.js"></script>
+	<script src="../js/MathUtils.js"></script>
+	<script src="../js/ui/Grid.js"></script>
+
+	<script>
+		var canvas;
+		var ctx;
+		var input;
+		var lastUpdate = Date.now();
+
+		var markers = [];
+		var currentPoints = [];
+
+		function init() {
+			canvas = document.getElementById("mainCanvas");
+			input = new InputHandler(canvas);
+			input.on("down", function(e) {
+				markers.push(new Marker(e.x, e.y));
+				currentPoints.push([e.x, e.y]);
+			});
+
+			ctx = canvas.getContext("2d");
+			animate();
+		}
+
+		function animate() {
+			var time = Date.now() - lastUpdate;
+			lastUpdate = Date.now();
+			requestAnimationFrame(arguments.callee);
+
+			update(time);
+			drawFrame();
+		}
+
+		function update(time) { }
+
+		function drawFrame() {
+			drawGrid(ctx);
+
+			for (var i = 0; i < markers.length; i++) {
+				markers[i].draw(ctx);
+			}
+			drawLines(ctx);
+		}
+
+		function drawLines(ctx) {
+			var i, j;
+			var lines = [];
+
+			ctx.beginPath();
+			for (i = 0; i + 1 < currentPoints.length; ) {
+				ctx.moveTo(currentPoints[i][0], currentPoints[i][1]);
+				ctx.lineTo(currentPoints[i + 1][0], currentPoints[i + 1][1]);
+				lines.push([currentPoints[i][0], currentPoints[i][1],
+					currentPoints[i + 1][0], currentPoints[i + 1][1]]);
+
+				i += 2;
+			}
+			ctx.stroke();
+
+			for (i = 0; i < lines.length; i++) {
+				for (j = i + 1; j < lines.length; j++) {
+					var point = MathUtils.linesIntersect(
+							lines[i][0], lines[i][1], lines[i][2], lines[i][3],
+							lines[j][0], lines[j][1], lines[j][2], lines[j][3]);
+
+					if (point) {
+						Marker.drawAt(ctx, point[0], point[1], Marker.RED);
+					}
+				}
+			}
+		}
+
+		function drawGrid(ctx) {
+			ctx.fillStyle = "white";
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			Grid.draw(ctx, canvas.width, canvas.height);
+		}
+	</script>
+</head>
+
+<body onload="init()" >
+<canvas id="mainCanvas" width="625" height="500"></canvas>
+</body>
+</html>
