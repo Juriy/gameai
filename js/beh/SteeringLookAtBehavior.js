@@ -1,21 +1,20 @@
 function SteeringLookAtBehavior(x, y) {
     this.dest = vec2.createFrom(x, y);
-    this.targetRadius = 0.01;
-    this.slowRadius = 0.1;
-    this.timeToTarget = 10;
+    this.acceptRadius = 0.01;
+    this.slowRadius = 0.5;
+    this.timeToTarget = 30;
 }
 
 _p = SteeringLookAtBehavior.prototype;
 
 _p.applyToAgent = function(time, agent) {
-    var acceptDistance = 0.01;
-    var rotationSpeed = 0.002;
 
-    //debugger;
     var targetAngle = vec2.subtract(this.dest, agent.pos, vec2.create());
     var targetOrientation = Math.atan2(-targetAngle[0], targetAngle[1]) + Math.PI/2;
 
     var rotation = targetOrientation - agent.orientation;
+
+
 
     while (rotation > Math.PI) {
         rotation -= Math.PI*2;
@@ -26,7 +25,9 @@ _p.applyToAgent = function(time, agent) {
 
     var rotationSize = Math.abs(rotation);
 
-    if (rotationSize < this.targetRadius) {
+    if (rotationSize < this.acceptRadius) {
+        agent.setRotation(0);
+        agent.setAngularSteering(0);
         return true;
     }
 
@@ -40,6 +41,8 @@ _p.applyToAgent = function(time, agent) {
 
     targetRotation *= rotation / rotationSize;
     var steering = (targetRotation - agent.rotation)/this.timeToTarget;
+
+
 
     agent.setAngularSteering(steering);
 };

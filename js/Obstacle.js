@@ -68,7 +68,7 @@ _p._fillLines = function(ctx) {
 	
 	ctx.stroke();
 	ctx.restore();
-} 
+};
 
 _p.update = function(time) {
 

@@ -31,3 +31,7 @@ _p.applyToAgent = function(time, agent) {
     agent.setLinearSteering(steering);
     return distance < this.acceptRadius;
 };
+
+_p.toString = function() {
+    return "Steering Move Behavior";
+};
