@@ -71,3 +71,19 @@ MathUtils.pointInsidePolygon = function (px, py, polygon, rayX, rayY) {
     }
     return intersectCount%2 == 1;
 };
+
+// Can be probably optimized by checking that the both points are on one
+// "side" of the poly
+MathUtils.segmentIntersectsPolygon = function(x0, y0, x1, y1, polygon) {
+    for (var i = 0; i < polygon.length; i++) {
+        var polyX0 = polygon[i][0];
+        var polyY0 = polygon[i][1];
+        var polyX1 = i + 1 == polygon.length ? polygon[0][0] : polygon[i + 1][0];
+        var polyY1 = i + 1 == polygon.length ? polygon[0][1] : polygon[i + 1][1];
+
+        if (MathUtils.linesIntersect(x0, y0, x1, y1, polyX0, polyY0, polyX1, polyY1)) {
+            return true;
+        }
+    }
+    return false;
+};

@@ -1,5 +1,5 @@
 function Agent() {
-	this.color = "darkgreen";
+	this.color = "#4D6821";
 	this.pos = [300, 100];
 	this.orientation = Math.PI/2;
 
@@ -18,6 +18,14 @@ function Agent() {
 }
 
 var _p = Agent.prototype;
+
+_p.setPosition = function(x, y) {
+    this.pos = vec2.create([x, y]);
+};
+
+_p.setOrientation = function(o) {
+    this.orientation = o;
+};
 
 _p.draw = function(ctx) {
 	ctx.fillStyle = this.color;
@@ -84,7 +92,11 @@ _p.setLinearSteering = function(s) {
 
 
 _p.setVelocity = function(v) {
-	trim(v, this.maxLinearVelocity);
+    if (vec2.length(v) > this.maxLinearVelocity) {
+        vec2.normalize(v);
+        vec2.scale(v, this.maxLinearVelocity);
+    }
+
 	this.velocity = v;
 };
 

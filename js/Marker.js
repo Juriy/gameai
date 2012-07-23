@@ -9,13 +9,22 @@ function Marker(x, y, color) {
 _p = Marker.prototype;
 
 _p.draw = function(ctx) {
+    var small = false;
+    if (small) {
+        var size = 5; // 10
+        var lineWidth = 3; //5
+    } else {
+        var size = 10;
+        var lineWidth = 5;
+    }
+
 	ctx.strokeStyle = this._color;
 	ctx.lineWidth = 5;
 	ctx.beginPath();
-	ctx.moveTo(this._x - 10, this._y + 10);
-	ctx.lineTo(this._x + 10, this._y - 10);
-	ctx.moveTo(this._x - 10, this._y - 10);
-	ctx.lineTo(this._x + 10, this._y + 10);
+	ctx.moveTo(this._x - size, this._y + size);
+	ctx.lineTo(this._x + size, this._y - size);
+	ctx.moveTo(this._x - size, this._y - size);
+	ctx.lineTo(this._x + size, this._y + size);
 	ctx.stroke();
 	ctx.lineWidth = 1;
 };

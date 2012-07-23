@@ -30,6 +30,11 @@
 	<script src="js/MathUtils.js"></script>
 	<script src="js/ui/Grid.js"></script>
 
+	<script src="js/mapdata.js"></script>
+
+	<script src="js/Map.js"></script>
+	<script src="js/Graph.js"></script>
+
 	<script>
 
 		function sign(number) {
@@ -40,6 +45,8 @@
 	<script>
 		var MODE_OBSTACLES = 0;
 		var MODE_POINTS = 1;
+
+		var map = new Map(mapData);
 
 		var mode = MODE_OBSTACLES;
 
@@ -54,16 +61,22 @@
 		var input;
 
 		var currentPoints = [];
-		var obstacles = [];
 
-		var bManager = new BehaviorManager(agent);
+		var graph;
+		var path;
+
+//		var bManager = new BehaviorManager(agent);
 
 		function init() {
+			createGraph();
+			agent.setPosition(220, 70);
+			agent.setOrientation(Math.PI/2 - 0.2);
+
 			canvas = document.getElementById("mainCanvas");
 			input = new InputHandler(canvas);
 			input.on("down", function(e) {
 				if (mode == MODE_POINTS) {
-					markers.push(new Marker(e.x, e.y, collidesWithObstacle(e.x, e.y) ? Marker.RED : Marker.GREEN));
+					markers.push(new Marker(e.x, e.y, map.collidesWithObstacle(e.x, e.y) ? Marker.RED : Marker.GREEN));
 				} else {
 					markers.push(new Marker(e.x, e.y));
 				}
@@ -74,13 +87,61 @@
 			animate();
 		}
 
-		function collidesWithObstacle(x, y) {
-			for (var i = 0; i < obstacles.length; i++) {
-				if (obstacles[i].hasPoint(x, y))
-					return true;
+		function createGraph() {
+			/*var nodes = [];
+
+			var positions = [
+				[30, 30],
+				[230, 30],
+				[430, 30],
+				[30, 200],
+				[230, 200],
+				[430, 200]
+			];
+
+			var matrix = [
+				[0, 1, 0, 1, 1, 0],
+				[1, 0, 1, 0, 1, 1],
+				[0, 1, 0, 0, 0, 1],
+				[1, 0, 0, 0, 1, 0],
+				[1, 1, 0, 1, 0, 1],
+				[0, 1, 1, 0, 1, 0]
+			];
+
+			for (var i = 0; i < positions.length; i++) {
+				nodes.push(new Node(i, positions[i][0], positions[i][1]));
 			}
-			return false;
+			graph = new Graph(nodes, matrix);*/
+
+			var coords = [[248,76],[205,329],[592,230],[420,410],[95,410],[479,230],[420,16],[555,16]];
+			var matrix = [
+				[0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0, 0, 0]
+			];
+
+			var nodes = [];
+			for (var i = 0; i < coords.length; i++) {
+				nodes.push(new Node(i, coords[i][0], coords[i][1]));
+			}
+
+			for (i = 0; i < coords.length; i++) {
+				for (var j = 0; j < coords.length; j++) {
+					if (map.pointsVisible(coords[i][0], coords[i][1], coords[j][0], coords[j][1])) {
+						matrix[i][j] = 1;
+					}
+				}
+			}
+
+			graph = new Graph(nodes, matrix);
+			//path = graph.findPath(nodes[0], nodes[7]);
 		}
+
 
 		function animate() {
 			var time = Date.now() - lastUpdate;
@@ -98,15 +159,13 @@
 		function drawFrame() {
 			drawGrid(ctx);
 
+			graph.draw(ctx, path);
 			for (var i = 0; i < markers.length; i++) {
 				markers[i].draw(ctx);
 			}
 			agent.draw(ctx);
 
-			obstacles.forEach(function(item) {
-				item.draw(ctx);
-			});
-
+			map.draw(ctx);
 		}
 
 		function drawGrid(ctx) {
@@ -116,8 +175,10 @@
 		}
 
 		function newObstacle() {
-			if (currentPoints.length > 2)
-				obstacles.push(new Obstacle(currentPoints));
+			if (currentPoints.length > 2) {
+				map.addObstacle(new Obstacle(currentPoints));
+			}
+
 			currentPoints = [];
 			markers = [];
 		}
@@ -128,7 +189,26 @@
 		}
 
 		function saveMap() {
+			document.getElementById("mapcode").innerHTML = "var mapData = " + map.serialize() + ";";
+		}
 
+		function resetMap() {
+			map.reset();
+		}
+
+		function newGraph() {
+			var nodes = [];
+			var i = 0;
+			currentPoints.forEach(function(it) {
+				nodes.push(new Node(i++, it[0], it[1]));
+			});
+			graph = new Graph(nodes, []);
+			currentPoints = [];
+			markers = [];
+		}
+
+		function saveGraph() {
+			document.getElementById("mapcode").innerHTML = "var nodes = " + graph.serialize() + ";";
 		}
 	</script>
 </head>
@@ -137,8 +217,16 @@
 <div style="float: left; margin-right: 20px">
 	<input type="button" value="New Obstacle" style="float: left;" onclick="newObstacle()"/><br/>
 	<input type="button" value="Start Testing Points" style="float: left;" onclick="switchToPoints()"/><br/>
-	<input type="button" value="Save Map" style="float: left;" onclick="saveMap()"/>
+	<input type="button" value="Save Map" style="float: left;" onclick="saveMap()"/><br/>
+	<input type="button" value="Reset Map" style="float: left;" onclick="resetMap()"/><br/>
+	<input type="button" value="New Graph" style="float: left;" onclick="newGraph()"/><br/>
+	<input type="button" value="Save Graph" style="float: left;" onclick="saveGraph()"/><br/>
 </div>
-<canvas id="mainCanvas" width="625" height="500"></canvas>
+<canvas id="mainCanvas" width="625" height="500" style="float: left;"></canvas>
+
+<div style="float: left; margin-left: 20px;">
+	<textarea id="mapcode" style="width: 180px; height: 100px;"></textarea>
+</div>
+
 </body>
 </html>
