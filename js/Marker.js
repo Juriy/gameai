@@ -37,6 +37,10 @@ Marker.RED = "#EEA2AD";
 Marker.GREEN = "#A2CD5A";
 Marker.BLUE = "#9AC0CD";
 
+Marker.randomColor = function() {
+    return [Marker.RED, Marker.GREEN, Marker.BLUE][Math.floor(Math.random()*3)];
+};
+
 Marker.drawAt = function(ctx, x, y, color) {
     new Marker(x, y, color).draw(ctx);
 };

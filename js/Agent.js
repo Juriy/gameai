@@ -15,6 +15,9 @@ function Agent() {
 	
     this.maxAngularVelocity = 0.01;
 	this.maxAngularSteering = 0.01;
+
+    this.hunger = 0;
+    this.energy = 100;
 }
 
 var _p = Agent.prototype;

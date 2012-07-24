@@ -30,7 +30,16 @@ _p.update = function (time) {
         if (behavior.applyToAgent(time, this.agent)) {
             this.agent.stop();
             this.current++;
+
+            if (!this.behaviors[this.current]) {
+                this.onSequenceEnd();
+            }
         }
     }
 
 };
+
+_p.onSequenceEnd = function() {
+
+};
+

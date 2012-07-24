@@ -35,6 +35,14 @@
 	<script src="js/Map.js"></script>
 	<script src="js/Graph.js"></script>
 
+	<script src="js/behaviortree/BehaviorTreeNode.js"></script>
+	<script src="js/behaviortree/NumericDecisionNode.js"></script>
+	<script src="js/behaviortree/ProbabilisticDecisionNode.js"></script>
+	<script src="js/behaviortree/SampleActions.js"></script>
+
+	<script src="js/beh/EatBehavior.js"></script>
+	<script src="js/beh/SleepBehavior.js"></script>
+
 	<script>
 
 		function sign(number) {
@@ -47,7 +55,7 @@
 		var MODE_POINTS = 1;
 		var MODE_PATHFIND = 2;
 
-		var drawGraph = true;
+		var drawGraph = false;
 
 		var map = new Map(mapData);
 
@@ -81,6 +89,11 @@
 		var path;
 
 		var bManager = new BehaviorManager(agent);
+		bManager.onSequenceEnd = function() {
+			decisionTree.execute(agent);
+		};
+
+		var decisionTree = buildDecisionTree();
 
 		function init() {
 			createGraph();
@@ -106,7 +119,26 @@
 
 			ctx = canvas.getContext("2d");
 			animate();
+			goToRandomPoint();
 		}
+
+
+		function buildDecisionTree() {
+			var wander = new WanderAroundAction();
+			var sleep = new SleepAction();
+			var eat = new EatAction();
+
+			return new NumericDecisionNode("hunger", 50,
+					new NumericDecisionNode("energy", 30,
+							sleep,
+							wander),
+					new ProbabilisticDecisionNode(0.3,
+							eat,
+							new NumericDecisionNode("energy", 30,
+									sleep,
+									wander)));
+		}
+
 
 		function findClosestWaypoint(x, y) {
 			var minDistance = Number.MAX_VALUE;
@@ -204,6 +236,19 @@
 
 			bManager.update(time);
 			agent.update(time);
+
+
+			if (Math.random() < 0.03)
+				agent.hunger += Math.random()*5;
+
+			if (agent.hunger > 100)
+				agent.hunger = 100;
+
+			if (Math.random() < 0.01)
+				agent.energy -= Math.random()*3;
+			if (agent.energy < 0)
+				agent.energy = 0;
+
 		}
 
 		function drawFrame() {
@@ -218,6 +263,21 @@
 			agent.draw(ctx);
 
 			map.draw(ctx);
+			drawStats(ctx);
+		}
+
+		function drawStats(ctx) {
+			ctx.fillStyle = "blue";
+			ctx.strokeStyle = "black";
+			ctx.lineWidth = 1;
+
+			ctx.fillRect(550, 10, ((100 - agent.hunger)/100)*50, 10);
+			ctx.strokeRect(550, 10, 50, 10);
+
+			ctx.fillStyle = "green";
+			ctx.fillRect(550, 25, (agent.energy/100)*50, 10);
+			ctx.strokeRect(550, 25, 50, 10);
+
 		}
 
 		function drawGrid(ctx) {
@@ -280,7 +340,8 @@
 				point = [Math.floor(Math.random()*canvas.width), Math.floor(Math.random()*canvas.height)];
 			}
 
-			markers.push(new Marker(point[0], point[1]));
+			markers = [];
+			markers.push(new Marker(point[0], point[1], Marker.randomColor()));
 			agent.stop();
 			navigateTo(point[0], point[1]);
 
