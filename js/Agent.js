@@ -10,11 +10,11 @@ function Agent() {
 
 	this.rotation = 0;
 	
-	this.maxLinearVelocity = 0.025;
-	this.maxLinearSteering = 0.002;
+	this.maxLinearVelocity = 0.1;
+	this.maxLinearSteering = 0.01;
 	
-    this.maxAngularVelocity = 0.02;
-	this.maxAngularSteering = 0.005;
+    this.maxAngularVelocity = 0.01;
+	this.maxAngularSteering = 0.01;
 }
 
 var _p = Agent.prototype;
@@ -46,7 +46,7 @@ _p.draw = function(ctx) {
 	ctx.closePath();
 	ctx.fill();
 
-    this._drawSteeringVector(ctx);
+    //this._drawSteeringVector(ctx);
 };
 
 _p._drawSteeringVector = function(ctx) {
@@ -132,6 +132,7 @@ _p.update = function(time) {
         vec2.scale(this.velocity, this.maxLinearVelocity);
     }
 
+    //console.log(this.rotation*time);
     this.orientation += this.rotation*time;
     this.rotation += this.angularSteering;
 

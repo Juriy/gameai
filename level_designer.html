@@ -45,10 +45,13 @@
 	<script>
 		var MODE_OBSTACLES = 0;
 		var MODE_POINTS = 1;
+		var MODE_PATHFIND = 2;
+
+		var drawGraph = true;
 
 		var map = new Map(mapData);
 
-		var mode = MODE_OBSTACLES;
+		var mode = MODE_POINTS;
 
 		var canvas;
 		var ctx;
@@ -58,6 +61,18 @@
 
 		var markers = [];
 
+		// Tutorial
+		//var coords = [[248,76],[205,329],[592,230],[420,410],[95,410],[479,230],[420,16],[555,16]];
+
+		// Real
+		var coords = [[7,9],[164,8],[157,112],[9,108],[8,262],[8,487],[269,491],[508,466],[461,444],[493,385],
+			[554,386],[221,443],[214,391],[126,384],[167,359],[164,258],[91,306],[54,307],[53,383],[54,447],[253,355],
+			[129,444],[93,412],[171,413],[265,416],[85,190],[261,291],[309,276],[349,314],[409,298],[402,204],[331,166],
+			[250,196],[211,88],[213,53],[282,57],[280,100],[340,11],[432,43],[488,155],[592,163],
+			[602,117],[479,22],[567,52],[537,270],[380,410]];
+
+		var nodes = [];
+
 		var input;
 
 		var currentPoints = [];
@@ -65,7 +80,7 @@
 		var graph;
 		var path;
 
-//		var bManager = new BehaviorManager(agent);
+		var bManager = new BehaviorManager(agent);
 
 		function init() {
 			createGraph();
@@ -80,6 +95,12 @@
 				} else {
 					markers.push(new Marker(e.x, e.y));
 				}
+
+				if (mode == MODE_PATHFIND) {
+					agent.stop();
+					navigateTo(e.x, e.y);
+				}
+
 				currentPoints.push([e.x, e.y]);
 			});
 
@@ -87,59 +108,83 @@
 			animate();
 		}
 
-		function createGraph() {
-			/*var nodes = [];
-
-			var positions = [
-				[30, 30],
-				[230, 30],
-				[430, 30],
-				[30, 200],
-				[230, 200],
-				[430, 200]
-			];
-
-			var matrix = [
-				[0, 1, 0, 1, 1, 0],
-				[1, 0, 1, 0, 1, 1],
-				[0, 1, 0, 0, 0, 1],
-				[1, 0, 0, 0, 1, 0],
-				[1, 1, 0, 1, 0, 1],
-				[0, 1, 1, 0, 1, 0]
-			];
-
-			for (var i = 0; i < positions.length; i++) {
-				nodes.push(new Node(i, positions[i][0], positions[i][1]));
+		function findClosestWaypoint(x, y) {
+			var minDistance = Number.MAX_VALUE;
+			var minId;
+			for (var i = 0; i < nodes.length; i++) {
+				var dist = MathUtils.distance(nodes[i].x, nodes[i].y, x, y);
+				if (dist < minDistance) {
+					minDistance = dist;
+					minId = i;
+				}
 			}
-			graph = new Graph(nodes, matrix);*/
+			return minId;
+		}
 
-			var coords = [[248,76],[205,329],[592,230],[420,410],[95,410],[479,230],[420,16],[555,16]];
-			var matrix = [
-				[0, 0, 0, 0, 0, 0, 0, 0],
-				[0, 0, 0, 0, 0, 0, 0, 0],
-				[0, 0, 0, 0, 0, 0, 0, 0],
-				[0, 0, 0, 0, 0, 0, 0, 0],
-				[0, 0, 0, 0, 0, 0, 0, 0],
-				[0, 0, 0, 0, 0, 0, 0, 0],
-				[0, 0, 0, 0, 0, 0, 0, 0],
-				[0, 0, 0, 0, 0, 0, 0, 0]
-			];
+		function createGraph() {
+			var i, j;
+			var matrix = createMatrix(coords.length);
 
-			var nodes = [];
-			for (var i = 0; i < coords.length; i++) {
+
+			for (i = 0; i < coords.length; i++) {
 				nodes.push(new Node(i, coords[i][0], coords[i][1]));
 			}
 
-			for (i = 0; i < coords.length; i++) {
+			joinVisible(coords, matrix);
+			graph = new Graph(nodes, matrix);
+		}
+
+		function joinVisible(coords, matrix) {
+			for (var i = 0; i < coords.length; i++) {
 				for (var j = 0; j < coords.length; j++) {
 					if (map.pointsVisible(coords[i][0], coords[i][1], coords[j][0], coords[j][1])) {
 						matrix[i][j] = 1;
 					}
 				}
 			}
+		}
 
-			graph = new Graph(nodes, matrix);
-			//path = graph.findPath(nodes[0], nodes[7]);
+		function createMatrix(size) {
+			var matrix = [];
+			for (var i = 0; i < size; i++) {
+				matrix[i] = [];
+				for (var j = 0; j < size; j++) {
+					matrix[i][j] = 0;
+				}
+			}
+			return matrix;
+		}
+
+		function navigateTo(x, y) {
+			//agent.stop();
+			if (map.pointsVisible(agent.pos[0], agent.pos[1], x, y)) {
+				goTo(x, y);
+				return;
+			}
+
+
+			var node0 = findClosestWaypoint(agent.pos[0], agent.pos[1]);
+			var node1 = findClosestWaypoint(x, y);
+
+			if (node0 == node1) {
+				goTo(nodes[node0].x, nodes[node0].y);
+				goTo(x, y);
+				return;
+			}
+
+			path = graph.findPath(nodes[node0], nodes[node1]);
+
+			//bManager.add(new SteeringLookAtBehavior(path[0].x, path[0].y));
+			for (var i = 0; i < path.length; i++ ){
+				goTo(path[i].x, path[i].y);
+			}
+			goTo(x, y);
+
+		}
+
+		function goTo(x, y) {
+			bManager.add(new SteeringLookAtBehavior(x, y));
+			bManager.add(new SteeringMoveToBehavior(x, y));
 		}
 
 
@@ -153,13 +198,20 @@
 		}
 
 		function update(time) {
+			if (mode == MODE_PATHFIND) {
+				graph.setDrawConnections(false);
+			}
+
+			bManager.update(time);
 			agent.update(time);
 		}
 
 		function drawFrame() {
 			drawGrid(ctx);
 
-			graph.draw(ctx, path);
+			if (drawGraph)
+				graph.draw(ctx, path);
+
 			for (var i = 0; i < markers.length; i++) {
 				markers[i].draw(ctx);
 			}
@@ -197,18 +249,41 @@
 		}
 
 		function newGraph() {
-			var nodes = [];
+			nodes = [];
+			var matrix = createMatrix(currentPoints.length);
+
 			var i = 0;
 			currentPoints.forEach(function(it) {
 				nodes.push(new Node(i++, it[0], it[1]));
 			});
-			graph = new Graph(nodes, []);
+
+			joinVisible(currentPoints, matrix);
+
+
+			graph = new Graph(nodes, matrix);
 			currentPoints = [];
 			markers = [];
 		}
 
 		function saveGraph() {
 			document.getElementById("mapcode").innerHTML = "var nodes = " + graph.serialize() + ";";
+		}
+
+		function toggleDrawGraph() {
+			drawGraph = !drawGraph;
+		}
+
+		function goToRandomPoint() {
+			mode = MODE_PATHFIND;
+			var point = [];
+			while (!point.length || map.collidesWithObstacle(point[0], point[1])) {
+				point = [Math.floor(Math.random()*canvas.width), Math.floor(Math.random()*canvas.height)];
+			}
+
+			markers.push(new Marker(point[0], point[1]));
+			agent.stop();
+			navigateTo(point[0], point[1]);
+
 		}
 	</script>
 </head>
@@ -221,6 +296,11 @@
 	<input type="button" value="Reset Map" style="float: left;" onclick="resetMap()"/><br/>
 	<input type="button" value="New Graph" style="float: left;" onclick="newGraph()"/><br/>
 	<input type="button" value="Save Graph" style="float: left;" onclick="saveGraph()"/><br/>
+	<input type="button" value="Toggle Draw Graph" style="float: left;" onclick="toggleDrawGraph()"/><br/>
+	<input type="button" value="Do Pathfinding" style="float: left;" onclick="mode = MODE_PATHFIND"/><br/>
+	<input type="button" value="Go to Random Point" style="float: left;" onclick="goToRandomPoint()"/><br/>
+
+
 </div>
 <canvas id="mainCanvas" width="625" height="500" style="float: left;"></canvas>
 

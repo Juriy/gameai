@@ -87,3 +87,7 @@ MathUtils.segmentIntersectsPolygon = function(x0, y0, x1, y1, polygon) {
     }
     return false;
 };
+
+MathUtils.distance = function (x0, y0, x1, y1) {
+    return Math.sqrt((x0 - x1)*(x0 - x1) + (y0 - y1)*(y0 - y1));
+};

@@ -16,15 +16,15 @@ _p.reset = function() {
 };
 
 _p.update = function (time) {
-    for (var i = 0; i < this.behaviors.length; i++) {
+/*    for (var i = 0; i < this.behaviors.length; i++) {
         var behavior = this.behaviors[i];
         if (behavior) {
             if (behavior.applyToAgent(time, this.agent)) {
                 this.behaviors[i] = null;
             }
         }
-    }
-/*
+    }*/
+
     if (this.behaviors[this.current]) {
         var behavior = this.behaviors[this.current];
         if (behavior.applyToAgent(time, this.agent)) {
@@ -32,5 +32,5 @@ _p.update = function (time) {
             this.current++;
         }
     }
-*/
+
 };

@@ -1,21 +1,17 @@
 function SteeringLookAtBehavior(x, y) {
     this.dest = vec2.createFrom(x, y);
     this.acceptRadius = 0.01;
-    this.slowRadius = 0.5;
-    this.timeToTarget = 30;
+    this.slowRadius = 0.7;
+    this.timeToTarget = 1;
 }
 
 _p = SteeringLookAtBehavior.prototype;
 
 _p.applyToAgent = function(time, agent) {
+    var targetVector = vec2.subtract(this.dest, agent.pos, vec2.create());
+    var targetAngle = Math.atan2(targetVector[1], targetVector[0]);
 
-    var targetAngle = vec2.subtract(this.dest, agent.pos, vec2.create());
-    var targetOrientation = Math.atan2(-targetAngle[0], targetAngle[1]) + Math.PI/2;
-
-    var rotation = targetOrientation - agent.orientation;
-
-
-
+    var rotation = targetAngle - agent.orientation;
     while (rotation > Math.PI) {
         rotation -= Math.PI*2;
     }
@@ -23,24 +19,31 @@ _p.applyToAgent = function(time, agent) {
         rotation += Math.PI*2;
     }
 
-    var rotationSize = Math.abs(rotation);
-
-    if (rotationSize < this.acceptRadius) {
-        agent.setRotation(0);
-        agent.setAngularSteering(0);
+    var distance = Math.abs(rotation);
+    if (distance < this.acceptRadius) {
+        this.stop(agent);
         return true;
     }
 
-    var targetRotation;
+    var direction = rotation / distance;
 
-    if (rotationSize > this.slowRadius) {
-        targetRotation = agent.maxAngularSteering;
+    var targetSpeed;
+    if (distance > this.slowRadius) {
+        targetSpeed = agent.maxAngularVelocity;
     } else {
-        targetRotation = agent.maxAngularSteering * rotationSize / this.slowRadius;
+        targetSpeed = agent.maxAngularVelocity * distance / this.slowRadius;
     }
 
-    targetRotation *= rotation / rotationSize;
-    var steering = (targetRotation - agent.rotation)/this.timeToTarget;
+    var targetVelocity = targetSpeed*direction;
+
+    var steering = targetVelocity - agent.rotation;
+    steering /= this.timeToTarget;
 
     agent.setAngularSteering(steering);
+};
+
+_p.stop = function(agent) {
+    agent.setRotation(0);
+    agent.setAngularSteering(0);
+    return true;
 };

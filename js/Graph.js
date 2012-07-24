@@ -21,6 +21,7 @@ _p.getConnections = function() {
 function Graph(nodes, matrix) {
     this._nodes = nodes;
     this._drawConnectionLabels = false;
+    this._drawConnections = true;
 
     for (var i = 0; i < matrix.length; i++) {
         for (var j = 0; j < matrix[i].length; j++) {
@@ -32,6 +33,10 @@ function Graph(nodes, matrix) {
 }
 
 _p = Graph.prototype;
+
+_p.setDrawConnections = function(drawConnections) {
+    this._drawConnections = drawConnections;
+};
 
 _p.setDrawDistances = function(drawConnectionLabels) {
     this._drawConnectionLabels = drawConnectionLabels;
@@ -56,11 +61,13 @@ _p.draw = function(ctx, path) {
     ctx.fillStyle = "white";
 
     // Draw connections
-    this._nodes.forEach(function(node) {
-        node.getConnections().forEach(function(connection) {
-            self._drawConnection(ctx, node, connection.node, connection.weight, "black");
+    if (this._drawConnections) {
+        this._nodes.forEach(function(node) {
+            node.getConnections().forEach(function(connection) {
+                self._drawConnection(ctx, node, connection.node, connection.weight, "black");
+            });
         });
-    });
+    }
 
     // Highlight the path
     if (path) {
