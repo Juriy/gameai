@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Test</title>
+
+	<!-- <script src="js/helvetiker.typeface.js"></script> -->
+	<!-- <script src="js/aircut_light.typeface.js"></script> -->
+	<script src="js/airmole_shaded_regular.typeface.js"></script>
+	<script src="js/utils.js"></script>
+	
+	<script>
+		var canvas;
+		var ctx;
+		var style = {
+			fontStretchPercent: 1,
+			fontSize: 30,
+			letterSpacing: 0
+		};
+		
+		
+		var line1 = "Lorem ipsum dolor sit amet, consectetur adipiscing \nelit.asd";
+		var line2 = "Donec tempus, quam nec pellentesque imperdiet, nunc leo vehicula justo, sed feugiat lacus leo a sem. Ut in nibh id orci";
+		var line3 = "sagittis mollis. Donec pretium fermentum mi, eget aliquet libero egestas a. Aenean molestie ligula at eros auctor in facilisis";
+		function init() {
+			canvas = document.getElementById("mainCanvas");
+			ctx = canvas.getContext("2d");
+			
+			ctx.fillStyle = "#CCC";
+			
+			
+			renderText(ctx, line1);
+			/*ctx.translate(0, lineHeight);
+			renderText(ctx, line2);
+			ctx.translate(0, Math.round(this.pixelsFromPoints(face, style, face.lineHeight)));
+			renderText(ctx, line3);*/
+			// speechBubble(ctx, 50, 50, 100, 70, 15, 50 + 20, 50 + 70 + 20, -Math.PI/4);
+			
+			//roundedRect(ctx, 50, 50, 100, 70, 15);
+//			ctx.moveTo(100, 100);
+//			ctx.lineTo(250, 100);
+			//ctx.stroke();
+			
+//			animate();
+		}
+		
+		function renderText(ctx, text) {
+			var lines = text.split("\n");
+			
+			var lineHeight = Math.round(this.pixelsFromPoints(face, style, face.lineHeight));
+			
+			var pointScale = pixelsFromPoints(face, style, 1);
+
+			
+			for (var i = 0; i < lines.length; i++) {
+				var extents = getTextExtents(face, style, lines[i]);
+				ctx.fillRect(0, 0, extents.x*pointScale, lineHeight);
+
+				renderLine(ctx, lines[i]);
+				
+				var lineHeight = Math.round(this.pixelsFromPoints(face, style, face.lineHeight));
+				ctx.translate(0, lineHeight);
+			}
+		}
+		
+		function renderLine(ctx, text) {
+			ctx.save();
+			ctx.beginPath();
+			var pointScale = pixelsFromPoints(face, style, 1);
+			ctx.scale(pointScale * style.fontStretchPercent, -1 * pointScale);
+			ctx.translate(0, -1 * face.ascender);
+			
+			ctx.strokeStyle = "green";
+			//ctx.fillStyle = "#EEEEEE";
+			ctx.fillStyle = "#333";
+			//renderGlyph (ctx, face, 'S', style);
+			_renderWord (ctx, face, style, text);
+			ctx.fill();
+			ctx.stroke();
+			
+			ctx.restore();
+		}
+		
+	function getTextExtents(face, style, text) {
+		var extentX = 0;
+		var extentY = 0;
+		var horizontalAdvance;
+	
+		
+		var textLength = text.length;
+		for (var i = 0; i < textLength; i++) {
+			
+			var glyph = face.glyphs[text.charAt(i)] ? face.glyphs[text.charAt(i)] : face.glyphs[this.fallbackCharacter];
+			
+			var letterSpacingAdjustment = pointsFromPixels(face, style, style.letterSpacing);
+			// if we're on the last character, go with the glyph extent if that's more than the horizontal advance
+			extentX += i + 1 == textLength ? Math.max(glyph.x_max, glyph.ha) : glyph.ha;
+			extentX += letterSpacingAdjustment;
+
+			horizontalAdvance += glyph.ha + letterSpacingAdjustment;
+			
+		}
+		return { 
+			x: extentX, 
+			y: extentY,
+			ha: horizontalAdvance
+			
+		};
+	}
+	
+	function pointsFromPixels(face, style, pixels, dimension) {
+		var points = pixels * face.resolution / (parseInt(style.fontSize) * 72 / 100);
+		if (dimension == 'horizontal' && style.fontStretchPrecent) {
+			points *= style.fontStretchPercent;
+		}
+		return points;
+	}
+
+		
+		function _renderWord(ctx, face, style, text) {
+//				var surface = this.initializeSurface(face, style, text);
+//				var ctx = surface.context;
+//				var canvas = surface.canvas;
+//				ctx.beginPath();
+//				ctx.save();
+
+				var chars = text.split('');
+				var charsLength = chars.length;
+				for (var i = 0; i < charsLength; i++) {
+					renderGlyph(ctx, face, chars[i], style);
+				}
+
+
+/*				if (style.textDecoration == 'underline') {
+
+					ctx.beginPath();
+					ctx.moveTo(0, face.underlinePosition);
+					ctx.restore();
+					ctx.lineTo(0, face.underlinePosition);
+					ctx.strokeStyle = style.color;
+					ctx.lineWidth = face.underlineThickness;
+					ctx.stroke();
+				}
+
+				return { element: ctx.canvas, width: Math.floor(canvas.width) }; */
+			
+			}
+		
+		function pixelsFromPoints(face, style, points, dimension) {
+			var pixels = points * parseInt(style.fontSize) * 72 / (face.resolution * 100);
+			if (dimension == 'horizontal' && style.fontStretchPercent) {
+				pixels *= style.fontStretchPercent;
+			}
+			return pixels;
+		}
+		
+		
+		function speechBubble(ctx, x, y, width, height, radius, tailX, tailY, tailAngle) { 
+			
+			var ix = tailX - (tailY - (y + height))/Math.tan(tailAngle);
+			var iy = y + height;
+			
+			var ix1 = ix - 7;
+			var ix2 = ix + 7;
+			
+			ctx.beginPath(); 
+
+			// draw top and top right corner 
+			ctx.moveTo(x + radius, y); 
+			ctx.arcTo(x + width, y, x + width, y + radius, radius); 
+			
+			// draw right side and bottom right corner 
+			ctx.arcTo(x+width,y+height,x+width-radius,y+height,radius); 
+
+			// go to first intersection with the tail
+			ctx.lineTo(ix2, iy);
+			ctx.lineTo(tailX, tailY);
+			ctx.lineTo(ix1, iy);
+			
+			// draw bottom and bottom left corner 
+			ctx.arcTo(x,y+height,x,y+height-radius,radius); 
+			
+			// draw left and top left corner 
+			ctx.arcTo(x,y,x+radius,y,radius);
+
+			ctx.stroke();
+			
+			
+			
+			//ctx.moveTo(tailX, tailY);
+			//ctx.lineTo(ix, iy);
+			//ctx.stroke();
+		}
+		
+		function renderGlyph (ctx, face, char, style) {
+				var glyph = face.glyphs[char];
+
+				if (!glyph) {
+					//this.log.error("glyph not defined: " + char);
+					return this.renderGlyph(ctx, face, this.fallbackCharacter, style);
+				}
+
+				if (glyph.o) {
+
+					var outline;
+					if (glyph.cached_outline) {
+						outline = glyph.cached_outline;
+					} else {
+						outline = glyph.o.split(' ');
+						glyph.cached_outline = outline;
+					}
+
+					var outlineLength = outline.length;
+					for (var i = 0; i < outlineLength; ) {
+
+						var action = outline[i++];
+
+						switch(action) {
+							case 'm':
+								ctx.moveTo(outline[i++], outline[i++]);
+								break;
+							case 'l':
+								ctx.lineTo(outline[i++], outline[i++]);
+								break;
+
+							case 'q':
+								var cpx = outline[i++];
+								var cpy = outline[i++];
+								ctx.quadraticCurveTo(outline[i++], outline[i++], cpx, cpy);
+								break;
+
+							case 'b':
+								var x = outline[i++];
+								var y = outline[i++];
+								ctx.bezierCurveTo(outline[i++], outline[i++], outline[i++], outline[i++], x, y);
+								break;
+						}
+					}					
+				}
+				if (glyph.ha) {
+					var letterSpacingPoints = 
+						style.letterSpacing && style.letterSpacing != 'normal' ? 
+							this.pointsFromPixels(face, style, style.letterSpacing) : 
+							0;
+
+					ctx.translate(glyph.ha + letterSpacingPoints, 0);
+				}
+			}
+
+		
+		function roundedRect(ctx, x, y, width, height, radius) { 
+			ctx.beginPath(); 
+
+			// draw top and top right corner 
+			ctx.moveTo(x + radius, y); 
+			ctx.arcTo(x + width, y, x + width, y + radius, radius); 
+			
+			// draw right side and bottom right corner 
+			ctx.arcTo(x+width,y+height,x+width-radius,y+height,radius); 
+
+			// draw bottom and bottom left corner 
+			ctx.arcTo(x,y+height,x,y+height-radius,radius); 
+			
+			// draw left and top left corner 
+			ctx.arcTo(x,y,x+radius,y,radius); 
+		}
+		
+
+		
+		function arrow(ctx) {
+			ctx.strokeStyle='rgb(50,50,0)';
+			ctx.fillStyle='rgb(50,50,0)'; 
+			ctx.lineWidth=2; 
+			
+			// draw the line for the shaft 
+			
+			ctx.moveTo(10,30); 
+			ctx.lineTo(290,30); 
+			
+			// draw the top of the arrow head 
+			ctx.lineTo(285,28); 
+			
+			// draw the curve of the back 
+			ctx.arcTo(289,30, 285,32,8); 
+			
+			// draw the bottom of the arrow head 
+			ctx.lineTo(290,30); 
+			
+			// and make it draw 
+			ctx.stroke(); 
+			ctx.fill();
+			ctx.fill();
+		}
+	</script>
+</head>
+
+<body onload="init()">
+	<canvas id="mainCanvas" width="1000" height="1000"></canvas>
+</body>
+</html> 
