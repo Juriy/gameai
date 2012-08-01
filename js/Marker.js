@@ -4,34 +4,15 @@ function Marker(x, y, color) {
     this._color = color || "#9AC0CD";
 }
 
-
-
 _p = Marker.prototype;
 
 _p.draw = function(ctx) {
-    var small = false;
-    if (small) {
-        var size = 5; // 10
-        var lineWidth = 3; //5
-    } else {
-        var size = 10;
-        var lineWidth = 5;
-    }
-
-	ctx.strokeStyle = this._color;
-	ctx.lineWidth = 5;
-	ctx.beginPath();
-	ctx.moveTo(this._x - size, this._y + size);
-	ctx.lineTo(this._x + size, this._y - size);
-	ctx.moveTo(this._x - size, this._y - size);
-	ctx.lineTo(this._x + size, this._y + size);
-	ctx.stroke();
-	ctx.lineWidth = 1;
+    // for small marker
+    // size = 5; lineWidth = 3;
+    Shapes.drawMarker(ctx, this._x, this._y, 10, 5);
 };
 
-_p.update = function(time) {
-	
-};
+_p.update = function(time) { };
 
 Marker.RED = "#EEA2AD";
 Marker.GREEN = "#A2CD5A";
