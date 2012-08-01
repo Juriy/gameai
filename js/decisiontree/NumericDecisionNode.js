@@ -10,7 +10,7 @@ function NumericDecisionNode(name, threshold, leNode, gNode) {
     this._gNode = gNode;
 }
 
-extend(NumericDecisionNode, BehaviorTreeNode);
+extend(NumericDecisionNode, DecisionTreeNode);
 
 NumericDecisionNode.prototype.execute = function(agent, data) {
     var node = agent[this._name] > this._threshold ? this._gNode : this._leNode;

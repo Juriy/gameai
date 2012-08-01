@@ -3,7 +3,7 @@
  * If value is lesser or equal than the threshold, the leNode is executed
  * otherwise - gNode.
  */
-function BehaviorTreeNode() {
+function DecisionTreeNode() {
 }
 
 /**
@@ -13,6 +13,6 @@ function BehaviorTreeNode() {
  * @param agent the agent that needs to make a decision
  * @param data any external data (for example, the information about the world)
  */
-BehaviorTreeNode.prototype.execute = function(agent, data) {
+DecisionTreeNode.prototype.execute = function(agent, data) {
     throw "Abstract method - must be overwritten";
 };
