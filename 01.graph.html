@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Graph Rendering Demo</title>
+
+	<script src="js/utils.js"></script>
+	<script src="js/gl-matrix.js"></script>
+
+	<script src="js/ui/Grid.js"></script>
+	<script src="js/ui/Shapes.js"></script>
+
+	<script src="js/Agent.js"></script>
+	<script src="js/Obstacle.js"></script>
+
+	<script src="js/Rect.js"></script>
+	<script src="js/MathUtils.js"></script>
+
+	<script src="js/mapdata.js"></script>
+	<script src="js/Map.js"></script>
+	<script src="js/Graph.js"></script>
+
+	<script>
+
+	var map = new Map(mapData);
+	var canvas;
+	var ctx;
+
+	var agent;
+	var graph;
+
+	function init() {
+		agent = new Agent();
+		createGraph();
+		agent.setPosition(220, 70);
+		agent.setOrientation(Math.PI/2 - 0.2);
+
+		canvas = document.getElementById("mainCanvas");
+		ctx = canvas.getContext("2d");
+		drawFrame();
+	}
+
+	function createGraph() {
+		var coords = [[248,76],[205,329],[592,230],[420,410],[95,410],[479,230],[420,16],[555,16]];
+		var matrix =
+			   [[1, 1, 0, 0, 0, 0, 0, 0],
+				[1, 1, 0, 1, 0, 0, 0, 0],
+				[0, 0, 1, 1, 0, 1, 0, 0],
+				[0, 1, 1, 1, 1, 1, 1, 0],
+				[0, 0, 0, 1, 1, 0, 0, 0],
+				[0, 0, 1, 1, 0, 1, 1, 0],
+				[0, 0, 0, 1, 0, 1, 1, 1],
+				[0, 0, 0, 0, 0, 0, 1, 1]];
+
+		var nodes = [];
+		for (var i = 0; i < coords.length; i++) {
+			nodes.push(new Node(i, coords[i][0], coords[i][1]));
+		}
+
+		graph = new Graph(nodes, matrix);
+	}
+
+	function drawFrame() {
+		ctx.fillStyle = "white";
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+		Grid.draw(ctx, canvas.width, canvas.height);
+		graph.draw(ctx);
+		agent.draw(ctx);
+		map.draw(ctx);
+	}
+	</script>
+</head>
+
+<body onload="init()" >
+<canvas id="mainCanvas" width="625" height="500"></canvas>
+</body>
+</html>

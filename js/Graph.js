@@ -38,7 +38,7 @@ _p.setDrawConnections = function(drawConnections) {
     this._drawConnections = drawConnections;
 };
 
-_p.setDrawDistances = function(drawConnectionLabels) {
+_p.setDrawConnectionLabels = function(drawConnectionLabels) {
     this._drawConnectionLabels = drawConnectionLabels;
 };
 

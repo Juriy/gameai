@@ -19,13 +19,13 @@
 	<script src="js/Marker.js"></script>
 	<script src="js/RadiusMarker.js"></script>
 
-	<script src="js/beh/MoveToBehavior.js"></script>
-	<script src="js/beh/LookAtBehavior.js"></script>
-	<script src="js/beh/SteeringMoveToBehavior.js"></script>
-	<script src="js/beh/SteeringLookAtBehavior.js"></script>
-	<script src="js/beh/WanderBehavior.js"></script>
+	<script src="js/behavior/MoveToBehavior.js"></script>
+	<script src="js/behavior/LookAtBehavior.js"></script>
+	<script src="js/behavior/SteeringMoveToBehavior.js"></script>
+	<script src="js/behavior/SteeringLookAtBehavior.js"></script>
+	<script src="js/behavior/WanderBehavior.js"></script>
 
-	<script src="js/beh/BehaviorManager.js"></script>
+	<script src="js/behavior/BehaviorManager.js"></script>
 	<script src="js/Rect.js"></script>
 	<script src="js/MathUtils.js"></script>
 	<script src="js/ui/Grid.js"></script>
@@ -41,8 +41,8 @@
 	<script src="js/decisiontree/ProbabilisticDecisionNode.js"></script>
 	<script src="js/decisiontree/SampleActions.js"></script>
 
-	<script src="js/beh/EatBehavior.js"></script>
-	<script src="js/beh/SleepBehavior.js"></script>
+	<script src="js/behavior/EatBehavior.js"></script>
+	<script src="js/behavior/SleepBehavior.js"></script>
 
 
 	<script>
@@ -86,14 +86,13 @@
 		var input;
 
 		var currentPoints = [];
-
 		var graph;
 		var path;
 
 		var bManager = new BehaviorManager(agent);
-		bManager.onSequenceEnd = function() {
+		bManager.on("sequence_end", function() {
 			decisionTree.execute(agent);
-		};
+		});
 
 		var decisionTree = buildDecisionTree();
 

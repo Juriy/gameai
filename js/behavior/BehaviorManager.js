@@ -1,8 +1,11 @@
 function BehaviorManager(agent) {
+    EventEmitter.call(this);
     this.behaviors = [];
     this.current = 0;
     this.agent = agent;
 }
+
+extend(BehaviorManager, EventEmitter);
 
 _p = BehaviorManager.prototype;
 
@@ -16,7 +19,7 @@ _p.reset = function() {
 };
 
 _p.update = function (time) {
-/*    for (var i = 0; i < this.behaviors.length; i++) {
+    /* for (var i = 0; i < this.behaviors.length; i++) {
         var behavior = this.behaviors[i];
         if (behavior) {
             if (behavior.applyToAgent(time, this.agent)) {
@@ -32,6 +35,7 @@ _p.update = function (time) {
             this.current++;
 
             if (!this.behaviors[this.current]) {
+                this.emit("sequence_end");
                 this.onSequenceEnd();
             }
         }

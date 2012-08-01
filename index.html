@@ -19,13 +19,13 @@
 	<script src="js/Marker.js"></script>
 	<script src="js/RadiusMarker.js"></script>
 
-	<script src="js/beh/MoveToBehavior.js"></script>
-	<script src="js/beh/LookAtBehavior.js"></script>
-	<script src="js/beh/SteeringMoveToBehavior.js"></script>
-	<script src="js/beh/SteeringLookAtBehavior.js"></script>
-	<script src="js/beh/WanderBehavior.js"></script>
+	<script src="js/behavior/MoveToBehavior.js"></script>
+	<script src="js/behavior/LookAtBehavior.js"></script>
+	<script src="js/behavior/SteeringMoveToBehavior.js"></script>
+	<script src="js/behavior/SteeringLookAtBehavior.js"></script>
+	<script src="js/behavior/WanderBehavior.js"></script>
+	<script src="js/behavior/BehaviorManager.js"></script>
 
-	<script src="js/beh/BehaviorManager.js"></script>
 	<script src="js/Rect.js"></script>
 
 	<script>
@@ -56,15 +56,6 @@
 		]);
 		
 		var bManager = new BehaviorManager(agent);
-		
-		// bManager.add(new LookAtBehavior(marker.x, marker.y));
-
-		//bManager.add();
-		//bManager.add(new SteeringLookAtBehavior(markers[0].x, markers[0].y));
-		//bManager.add(new SteeringMoveToBehavior(markers[0].x, markers[0].y));
-		//bManager.add(new SteeringLookAtBehavior(markers[1].x, markers[1].y));
-		//bManager.add(new SteeringMoveToBehavior(markers[1].x, markers[1].y));
-
 		
 		function init() {
 			canvas = document.getElementById("mainCanvas");
