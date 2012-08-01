@@ -1,14 +1,9 @@
 function Obstacle(points) {
 	this._points = points;
-    this._drawBoundingRect = false;
     this._boundingRect = MathUtils.getBoundingRectangle(points);
 }
 
 _p = Obstacle.prototype;
-
-_p.setDrawBoundingRect = function(drawBoundingRect) {
-    this._drawBoundingRect = drawBoundingRect;
-};
 
 _p.draw = function(ctx) {
     Shapes.drawPolygon(ctx, this._points);
