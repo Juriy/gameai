@@ -1,3 +1,9 @@
+/**
+ * Renders the grid on the screen
+ * @param cellSize the size of the cell in pixels
+ * @param boldLine how many cells should be marked with the bold line
+ * @param color the color of the grid
+ */
 function Grid(cellSize, boldLine, color) {
     this._cellSize = cellSize || 25;
     this._boldLine = boldLine || 5;

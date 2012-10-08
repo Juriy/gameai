@@ -3,43 +3,42 @@
 <head>
 	<title>Test</title>
 
-	<script src="js/utils.js"></script>
+	<script src="../js/utils.js"></script>
 
-	<script src="js/EventEmitter.js"></script>
+	<script src="../js/EventEmitter.js"></script>
 
-	<script src="js/input/InputHandlerBase.js"></script>
-	<script src="js/input/MouseInputHandler.js"></script>
-	<script src="js/input/TouchInputHandler.js"></script>
-	<script src="js/input/InputHandler.js"></script>
+	<script src="../js/input/InputHandlerBase.js"></script>
+	<script src="../js/input/MouseInputHandler.js"></script>
+	<script src="../js/input/TouchInputHandler.js"></script>
+	<script src="../js/input/InputHandler.js"></script>
 
-	<script src="js/gl-matrix.js"></script>
-	
-	<script src="js/Agent.js"></script>
-	<script src="js/Obstacle.js"></script>
-	<script src="js/Marker.js"></script>
-	<script src="js/RadiusMarker.js"></script>
+	<script src="../js/gl-matrix.js"></script>
 
-	<script src="js/behavior/MoveToBehavior.js"></script>
-	<script src="js/behavior/LookAtBehavior.js"></script>
-	<script src="js/behavior/SteeringMoveToBehavior.js"></script>
-	<script src="js/behavior/SteeringLookAtBehavior.js"></script>
-	<script src="js/behavior/WanderBehavior.js"></script>
-	<script src="js/behavior/BehaviorManager.js"></script>
+	<script src="../js/Agent.js"></script>
+	<script src="../js/Obstacle.js"></script>
+	<script src="../js/ui/Marker.js"></script>
+	<script src="../js/RadiusMarker.js"></script>
 
-	<script src="js/Rect.js"></script>
+	<script src="../js/behavior/MoveToBehavior.js"></script>
+	<script src="../js/behavior/LookAtBehavior.js"></script>
+	<script src="../js/behavior/SteeringMoveToBehavior.js"></script>
+	<script src="../js/behavior/SteeringLookAtBehavior.js"></script>
+	<script src="../js/behavior/WanderBehavior.js"></script>
+
+	<script src="../js/behavior/BehaviorManager.js"></script>
 
 	<script>
-	
+
 		function sign(number) {
 			return number > 0 ? 1 : number == 0 ? 0 : -1;
 		}
 	</script>
-	
+
 	<script>
 		var canvas;
 		var ctx;
 		var lastUpdate = Date.now();
-		
+
 		var agent = new Agent();
 
 		var wanderMarker = new Marker(150, 300);
@@ -54,9 +53,18 @@
 			[70, 140],
 			[130, 140]
 		]);
-		
+
 		var bManager = new BehaviorManager(agent);
-		
+
+		// bManager.add(new LookAtBehavior(marker.x, marker.y));
+
+		//bManager.add();
+		//bManager.add(new SteeringLookAtBehavior(markers[0].x, markers[0].y));
+		//bManager.add(new SteeringMoveToBehavior(markers[0].x, markers[0].y));
+		//bManager.add(new SteeringLookAtBehavior(markers[1].x, markers[1].y));
+		//bManager.add(new SteeringMoveToBehavior(markers[1].x, markers[1].y));
+
+
 		function init() {
 			canvas = document.getElementById("mainCanvas");
 			input = new InputHandler(canvas);
@@ -68,12 +76,12 @@
 			ctx = canvas.getContext("2d");
 			animate();
 		}
-		
+
 		function animate() {
 			var time = Date.now() - lastUpdate;
 			lastUpdate = Date.now();
 			requestAnimationFrame(arguments.callee);
-			
+
 			update(time);
 			drawFrame(time);
 		}
@@ -86,7 +94,7 @@
 			//behavior.applyToAgent(time, agent);
 			agent.update(time);
 		}
-		
+
 		function drawFrame() {
 			drawGrid(ctx);
 
@@ -97,21 +105,21 @@
 			wanderMarker2.draw(ctx);
 			agent.draw(ctx);
 			// obstacle.draw(ctx);
-			
+
 			/*
-			ctx.beginPath(); // 
-			ctx.arc(100, 100, 50, 0, Math.PI/4, false);
-			ctx.lineTo(100, 100);
-			ctx.closePath();
-			ctx.fill(); */
+			 ctx.beginPath(); //
+			 ctx.arc(100, 100, 50, 0, Math.PI/4, false);
+			 ctx.lineTo(100, 100);
+			 ctx.closePath();
+			 ctx.fill(); */
 		}
-		
+
 		function drawGrid(ctx) {
 			ctx.fillStyle = "white";
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
-			
+
 			var cellSize = 25;
-			
+
 			ctx.beginPath();
 			for (var i = 0; i < canvas.width/cellSize; i++) {
 				ctx.moveTo(i*cellSize + 0.5, 0);
@@ -136,11 +144,11 @@
 			ctx.strokeStyle = "lightblue";
 			ctx.stroke();
 		}
-		
+
 	</script>
 </head>
 
 <body onload="init()">
-	<canvas id="mainCanvas" width="625" height="500"></canvas>
+<canvas id="mainCanvas" width="625" height="500"></canvas>
 </body>
 </html> 

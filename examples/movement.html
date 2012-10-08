@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Movement and Decisions</title>
+
+<!-- utils and events -->
+<script src="../js/utils.js"></script>
+<script src="../js/EventEmitter.js"></script>
+<script src="../js/input/InputHandlerBase.js"></script>
+<script src="../js/input/MouseInputHandler.js"></script>
+<script src="../js/input/TouchInputHandler.js"></script>
+<script src="../js/input/InputHandler.js"></script>
+
+<!-- level data -->
+<script src="../js/mapdata.js"></script>
+
+<!-- math utils -->
+<script src="../js/gl-matrix.js"></script>
+<script src="../js/Rect.js"></script>
+<script src="../js/MathUtils.js"></script>
+<script src="../js/Graph.js"></script>
+
+<!-- Entities -->
+<script src="../js/Map.js"></script>
+<script src="../js/Agent.js"></script>
+<script src="../js/Obstacle.js"></script>
+
+<!-- UI and graphics -->
+<script src="../js/ui/Grid.js"></script>
+<script src="../js/ui/Shapes.js"></script>
+<script src="../js/ui/Marker.js"></script>
+
+<!-- behaviors -->
+<script src="../js/behavior/BehaviorManager.js"></script>
+<script src="../js/behavior/SteeringMoveToBehavior.js"></script>
+<script src="../js/behavior/SteeringLookAtBehavior.js"></script>
+<script src="../js/behavior/WanderBehavior.js"></script>
+<script src="../js/behavior/EatBehavior.js"></script>
+<script src="../js/behavior/SleepBehavior.js"></script>
+
+<!-- decisions -->
+<script src="../js/decisiontree/DecisionTreeNode.js"></script>
+<script src="../js/decisiontree/NumericDecisionNode.js"></script>
+<script src="../js/decisiontree/ProbabilisticDecisionNode.js"></script>
+<script src="../js/decisiontree/SampleActions.js"></script>
+
+
+<script>
+var map = new Map(mapData);
+var canvas;
+var ctx;
+var lastUpdate = Date.now();
+var agent = new Agent();
+var marker;
+
+// Tutorial
+//var coords = [[248,76],[205,329],[592,230],[420,410],[95,410],[479,230],[420,16],[555,16]];
+
+// Real
+var coords = [[7,9],[164,8],[157,112],[9,108],[8,262],[8,487],[269,491],[508,466],[461,444],[493,385],
+	[554,386],[221,443],[214,391],[126,384],[167,359],[164,258],[91,306],[54,307],[53,383],[54,447],[253,355],
+	[129,444],[93,412],[171,413],[265,416],[85,190],[261,291],[309,276],[349,314],[409,298],[402,204],[331,166],
+	[250,196],[211,88],[213,53],[282,57],[280,100],[340,11],[432,43],[488,155],[592,163],
+	[602,117],[479,22],[567,52],[537,270],[380,410]];
+
+var nodes = [];
+
+var input;
+
+var graph;
+var path;
+
+var bManager = new BehaviorManager(agent);
+bManager.on("sequence_end", function() {
+	decisionTree.execute(agent);
+});
+
+var decisionTree = buildDecisionTree();
+
+function init() {
+	createGraph();
+	agent.setPosition(220, 70);
+	agent.setOrientation(Math.PI/2 - 0.2);
+
+	canvas = document.getElementById("mainCanvas");
+	input = new InputHandler(canvas);
+	ctx = canvas.getContext("2d");
+	animate();
+	goToRandomPoint();
+}
+
+function buildDecisionTree() {
+	var wander = new WanderAroundAction();
+	var sleep = new SleepAction();
+	var eat = new EatAction();
+
+	return new NumericDecisionNode("hunger", 50,
+			new NumericDecisionNode("energy", 30,
+					sleep,
+					wander),
+			new ProbabilisticDecisionNode(0.3,
+					eat,
+					new NumericDecisionNode("energy", 30,
+							sleep,
+							wander)));
+}
+
+function findClosestWaypoint(x, y) {
+	var minDistance = Number.MAX_VALUE;
+	var minId;
+	for (var i = 0; i < nodes.length; i++) {
+		var dist = MathUtils.distance(nodes[i].x, nodes[i].y, x, y);
+		if (dist < minDistance) {
+			minDistance = dist;
+			minId = i;
+		}
+	}
+	return minId;
+}
+
+function createGraph() {
+	var i, j;
+	var matrix = createMatrix(coords.length);
+
+	for (i = 0; i < coords.length; i++) {
+		nodes.push(new Node(i, coords[i][0], coords[i][1]));
+	}
+
+	joinVisible(coords, matrix);
+	graph = new Graph(nodes, matrix);
+}
+
+function joinVisible(coords, matrix) {
+	for (var i = 0; i < coords.length; i++) {
+		for (var j = 0; j < coords.length; j++) {
+			if (map.pointsVisible(coords[i][0], coords[i][1], coords[j][0], coords[j][1])) {
+				matrix[i][j] = 1;
+			}
+		}
+	}
+}
+
+function createMatrix(size) {
+	var matrix = [];
+	for (var i = 0; i < size; i++) {
+		matrix[i] = [];
+		for (var j = 0; j < size; j++) {
+			matrix[i][j] = 0;
+		}
+	}
+	return matrix;
+}
+
+function navigateTo(x, y) {
+	if (map.pointsVisible(agent.pos[0], agent.pos[1], x, y)) {
+		goTo(x, y);
+		return;
+	}
+
+	var node0 = findClosestWaypoint(agent.pos[0], agent.pos[1]);
+	var node1 = findClosestWaypoint(x, y);
+
+	if (node0 == node1) {
+		goTo(nodes[node0].x, nodes[node0].y);
+		goTo(x, y);
+		return;
+	}
+
+	path = graph.findPath(nodes[node0], nodes[node1]);
+
+	for (var i = 0; i < path.length; i++ ){
+		goTo(path[i].x, path[i].y);
+	}
+	goTo(x, y);
+}
+
+function goTo(x, y) {
+	bManager.add(new SteeringLookAtBehavior(x, y));
+	bManager.add(new SteeringMoveToBehavior(x, y));
+}
+
+function animate() {
+	var time = Date.now() - lastUpdate;
+	lastUpdate = Date.now();
+	requestAnimationFrame(arguments.callee);
+
+	update(time);
+	drawFrame();
+}
+
+function update(time) {
+	bManager.update(time);
+	agent.update(time);
+
+	if (Math.random() < 0.03)
+		agent.hunger += Math.random()*5;
+
+	if (agent.hunger > 100)
+		agent.hunger = 100;
+
+	if (Math.random() < 0.01)
+		agent.energy -= Math.random()*3;
+	if (agent.energy < 0)
+		agent.energy = 0;
+
+}
+
+function drawFrame() {
+	drawGrid(ctx);
+
+	marker.draw(ctx);
+	agent.draw(ctx);
+
+	map.draw(ctx);
+	drawStats(ctx);
+}
+
+function drawStats(ctx) {
+	ctx.fillStyle = "blue";
+	ctx.strokeStyle = "black";
+	ctx.lineWidth = 1;
+
+	ctx.fillRect(550, 10, ((100 - agent.hunger)/100)*50, 10);
+	ctx.strokeRect(550, 10, 50, 10);
+
+	ctx.fillStyle = "green";
+	ctx.fillRect(550, 25, (agent.energy/100)*50, 10);
+	ctx.strokeRect(550, 25, 50, 10);
+
+}
+
+function drawGrid(ctx) {
+	ctx.fillStyle = "white";
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	Grid.draw(ctx, canvas.width, canvas.height);
+}
+
+function goToRandomPoint() {
+	var point = [];
+	while (!point.length || map.collidesWithObstacle(point[0], point[1])) {
+		point = [Math.floor(Math.random()*canvas.width), Math.floor(Math.random()*canvas.height)];
+	}
+
+	marker = new Marker(point[0], point[1], Marker.randomColor());
+	agent.stop();
+	navigateTo(point[0], point[1]);
+
+}
+</script>
+</head>
+
+<body onload="init()" >
+<canvas id="mainCanvas" width="625" height="500" style="float: left;"></canvas>
+
+</body>
+</html>

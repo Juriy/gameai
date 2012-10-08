@@ -3,21 +3,21 @@
 <head>
 <title>Graph Rendering Demo</title>
 
-	<script src="js/utils.js"></script>
-	<script src="js/gl-matrix.js"></script>
+	<script src="../js/utils.js"></script>
+	<script src="../js/gl-matrix.js"></script>
 
-	<script src="js/ui/Grid.js"></script>
-	<script src="js/ui/Shapes.js"></script>
+	<script src="../js/ui/Grid.js"></script>
+	<script src="../js/ui/Shapes.js"></script>
 
-	<script src="js/Agent.js"></script>
-	<script src="js/Obstacle.js"></script>
+	<script src="../js/Agent.js"></script>
+	<script src="../js/Obstacle.js"></script>
 
-	<script src="js/Rect.js"></script>
-	<script src="js/MathUtils.js"></script>
+	<script src="../js/Rect.js"></script>
+	<script src="../js/MathUtils.js"></script>
 
-	<script src="js/mapdata.js"></script>
-	<script src="js/Map.js"></script>
-	<script src="js/Graph.js"></script>
+	<script src="../js/mapdata.js"></script>
+	<script src="../js/Map.js"></script>
+	<script src="../js/Graph.js"></script>
 
 	<script>
 
@@ -29,9 +29,13 @@
 	var graph;
 	var route;
 
+	var nodes = [];
+
 	function init() {
 		agent = new Agent();
 		createGraph();
+		route = graph.findPath(nodes[0], nodes[7]);
+
 		agent.setPosition(220, 70);
 		agent.setOrientation(Math.PI/2 - 0.2);
 
@@ -52,7 +56,7 @@
 				[0, 0, 0, 1, 0, 1, 1, 1],
 				[0, 0, 0, 0, 0, 0, 1, 1]];
 
-		var nodes = [];
+
 		for (var i = 0; i < coords.length; i++) {
 			nodes.push(new Node(i, coords[i][0], coords[i][1]));
 		}
@@ -71,16 +75,14 @@
 	function drawFrame() {
 		ctx.fillStyle = "white";
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
+		ctx.translate(0, 40);
 
-		Grid.draw(ctx, canvas.width, canvas.height);
 		graph.draw(ctx, route);
-		agent.draw(ctx);
-		map.draw(ctx);
 	}
 	</script>
 </head>
 
 <body onload="init()" >
-<canvas id="mainCanvas" width="625" height="500"></canvas>
+<canvas id="mainCanvas" width="725" height="600"></canvas>
 </body>
 </html>

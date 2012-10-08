@@ -1,3 +1,7 @@
+/**
+ * A number of utility methods for drawing the polygons,
+ * agents (boids), arrows, fills, etc.
+ */
 var Shapes = {
 
 };
@@ -81,6 +85,7 @@ Shapes.drawPolygon = function(ctx, points) {
     ctx.stroke();
     ctx.restore();
 };
+
 
 Shapes.fillPolygon = function(ctx, points) {
     ctx.save();
