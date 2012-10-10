@@ -28,6 +28,7 @@
 <script src="js/Obstacle.js"></script>
 
 <script src="js/v2/Agent.js"></script>
+<script src="js/v2/Steerings.js"></script>
 
 <!-- UI and graphics -->
 <script src="js/ui/Grid.js"></script>
@@ -93,15 +94,17 @@
 		//seek(agentData, coords);
 
 		// updateAgentPosition(agentData, agent);
-		var steering = seek2(agentData, coords);
-		update2(agentData, steering, e.deltaTime);
+		var steering = Steerings.arrive(agentData, coords);
+		if (steering == null) {
+			agentData.velocity = vec2.create();
+		} else {
+			update2(agentData, steering, e.deltaTime);
+			// Look where are you going
+			agent.setOrientation(Math.atan2(agentData.velocity[1], agentData.velocity[0]));
+			agent.setPosition(agentData.pos[0], agentData.pos[1]);
+		}
 
 		cursorHover.setPosition(coords.x, coords.y);
-
-		agent.setPosition(agentData.pos[0], agentData.pos[1]);
-		// Look where are you going
-		agent.setOrientation(Math.atan2(agentData.velocity[1], agentData.velocity[0]));
-
 	});
 
 	bootstrap.on("draw", function(e) {
@@ -165,23 +168,6 @@
 		agent.setOrientation(Math.atan2(obj.velocity[1], obj.velocity[0]));
 	}
 
-	function seek2(obj, target) {
-		// Create the structure to hold our output
-		var steering = {};
-
-		// Get the direction to the target
-		var vecTarget = vec2.createFrom(target.x, target.y);
-		// subtract the position from the target to get the vector from the vehicles position to the target.
-		// Normalize it then multiply by max speed to get the maximum velocity from your position to the target.
-		steering.linear = vec2.create();
-		vec2.subtract(vecTarget, obj.pos, steering.linear);
-
-		vec2.normalize(steering.linear);
-		vec2.scale(steering.linear, obj.maxAcceleration);
-
-		steering.angular = 0;
-		return steering;
-	}
 
 	function update2(obj, steering, time) {
 		// Update the position and orientation
