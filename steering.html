@@ -62,7 +62,7 @@
 		pos: agent.getPosition(),
 		velocity: vec2.create(),
 		mass: 50,
-		maxSpeed: 2
+		maxSpeed: 0.7
 	};
 
 	var bootstrap = new Bootstrap();
@@ -142,6 +142,9 @@
 		}
 		vec2.add(obj.pos, obj.velocity, obj.pos);
 		agent.setPosition(obj.pos[0], obj.pos[1]);
+
+		// Look where are you going
+		agent.setOrientation(Math.atan2(obj.velocity[1], obj.velocity[0]));
 	}
 
 </script>

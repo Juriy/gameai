@@ -20,7 +20,6 @@ _p.setOrientation = function(o) {
 
 _p.draw = function(ctx) {
     Shapes.drawBoid(ctx, this.pos[0], this.pos[1], this.orientation);
-    // this._drawSteeringVector(ctx);
 };
 
 _p._drawSteeringVector = function(ctx) {
