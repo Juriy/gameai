@@ -9,7 +9,7 @@ _p = Marker.prototype;
 _p.draw = function(ctx) {
     // for small marker
     // size = 5; lineWidth = 3;
-    Shapes.drawMarker(ctx, this._x, this._y, 10, 5);
+    Shapes.drawMarker(ctx, this._x, this._y, 10, 5, this._color);
 };
 
 _p.update = function(time) { };

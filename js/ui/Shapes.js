@@ -6,12 +6,12 @@ var Shapes = {
 
 };
 
-Shapes.drawMarker = function(ctx, x, y, size, lineWidth) {
+Shapes.drawMarker = function(ctx, x, y, size, lineWidth, color) {
     size = size || 10;
     lineWidth = lineWidth || 5;
-
+    color = color || Marker.BLUE;
     ctx.save();
-    ctx.strokeStyle = this._color;
+    ctx.strokeStyle = color;
     ctx.lineWidth = 5;
     ctx.beginPath();
     ctx.moveTo(x - size, y + size);
