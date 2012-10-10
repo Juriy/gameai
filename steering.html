@@ -2,6 +2,7 @@
 <html>
 <head>
 <title>Movement and Decisions</title>
+<meta charset="utf-8" />
 
 <!-- utils and events -->
 <script src="js/utils.js"></script>
@@ -60,8 +61,8 @@
 	var agentData = {
 		pos: agent.getPosition(),
 		velocity: vec2.create(),
-		mass: 1,
-		maxSpeed: 1
+		mass: 50,
+		maxSpeed: 2
 	};
 
 	var bootstrap = new Bootstrap();
@@ -81,9 +82,7 @@
 		var coords = bootstrap.input.getCoordinates();
 		seek(agentData, coords);
 
-		agent.setPosition(agentData.pos[0], agentData.pos[1]);
-		console.log(agentData.pos[0] + ":" + agentData.pos[1]);
-
+		updateAgentPosition(agentData, agent);
 		cursorHover.setPosition(coords.x, coords.y);
 	});
 
@@ -115,6 +114,7 @@
 */
 
 	function seek(obj, target) {
+		//debugger;
 		var vecTarget = vec2.createFrom(target.x, target.y);
 		// subtract the position from the target to get the vector from the vehicles position to the target.
 		// Normalize it then multiply by max speed to get the maximum velocity from your position to the target.
@@ -131,15 +131,17 @@
 		//divide the steeringForce by the mass(which makes it the acceleration),
 		// then add it to velocity to get the new velocity
 		vec2.scale(steeringForce, 1/obj.mass);
-		vec2.add(obj.velocity, steeringForce);
 
+		vec2.add(obj.velocity, steeringForce, obj.velocity);
+	}
+
+	function updateAgentPosition(obj, agent) {
 		if (vec2.length(obj.velocity) > obj.maxSpeed) {
 			vec2.normalize(obj.velocity);
 			vec2.scale(obj.velocity, obj.maxSpeed);
 		}
-
-		console.log(obj.velocity);
-		vec2.add(obj.pos, obj.velocity);
+		vec2.add(obj.pos, obj.velocity, obj.pos);
+		agent.setPosition(obj.pos[0], obj.pos[1]);
 	}
 
 </script>
