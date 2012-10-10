@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Movement and Decisions</title>
+	<meta charset="utf-8" />
+
+	<!-- utils and events -->
+	<script src="js/utils.js"></script>
+	<script src="js/EventEmitter.js"></script>
+	<script src="js/input/InputHandlerBase.js"></script>
+	<script src="js/input/MouseInputHandler.js"></script>
+	<script src="js/input/TouchInputHandler.js"></script>
+	<script src="js/input/InputHandler.js"></script>
+
+	<script src="js/util/Time.js"></script>
+	<script src="js/util/Bootstrap.js"></script>
+
+	<!-- math utils -->
+	<script src="js/gl-matrix.js"></script>
+	<script src="js/Rect.js"></script>
+	<script src="js/MathUtils.js"></script>
+	<script src="js/Graph.js"></script>
+
+	<!-- Entities -->
+	<script src="js/Map.js"></script>
+
+	<!-- <script src="js/Agent.js"></script> -->
+	<script src="js/Obstacle.js"></script>
+
+	<script src="js/v2/Agent.js"></script>
+	<script src="js/v2/Steerings.js"></script>
+
+	<!-- UI and graphics -->
+	<script src="js/ui/Grid.js"></script>
+	<script src="js/ui/Shapes.js"></script>
+	<script src="js/ui/Marker.js"></script>
+
+	<!-- behaviors -->
+	<script src="js/behavior/BehaviorManager.js"></script>
+	<script src="js/behavior/SteeringMoveToBehavior.js"></script>
+	<script src="js/behavior/SteeringLookAtBehavior.js"></script>
+	<script src="js/behavior/WanderBehavior.js"></script>
+	<script src="js/behavior/EatBehavior.js"></script>
+	<script src="js/behavior/SleepBehavior.js"></script>
+
+	<!-- decisions -->
+	<script src="js/decisiontree/DecisionTreeNode.js"></script>
+	<script src="js/decisiontree/NumericDecisionNode.js"></script>
+	<script src="js/decisiontree/ProbabilisticDecisionNode.js"></script>
+	<script src="js/decisiontree/SampleActions.js"></script>
+
+
+	<script>
+		var NUM_AGENTS = 10;
+
+		var agentsData = [];
+		var agents = [];
+		for (var i = 0; i < NUM_AGENTS; i++) {
+			var agent = new Agent();
+			agent.setPosition(300 + 70*Math.cos(i*2*Math.PI/NUM_AGENTS),
+					300 + 70*Math.sin(i*2*Math.PI/NUM_AGENTS));
+			agent.setOrientation(Math.random()*Math.PI*2);
+			agents.push(agent);
+
+			agentsData.push({
+				pos: agent.getPosition(),
+				velocity: vec2.create(),
+				mass: 50,
+				maxSpeed: 0.05,
+				maxAcceleration: 0.0001
+			});
+		}
+
+		var marker = new Marker(300, 300);
+
+		var bootstrap = new Bootstrap();
+		var cursorHover = new Marker(0, 0, Marker.GREEN);
+
+		bootstrap.input.on("down", function(e) {
+			marker = new Marker(e.x, e.y);
+			goTo(e.x, e.y);
+		});
+
+		bootstrap.on("ready", function() {
+			// goToRandomPoint();
+		});
+
+		bootstrap.on("update", function(e) {
+			// agent.update(e.deltaTime);
+			var cursor = bootstrap.input.getCoordinates();
+			//seek(agentData, coords);
+
+			for (var i = 0; i < NUM_AGENTS; i++) {
+				var distanceToPredator = vec2.dist(agentsData[i].pos, vec2.createFrom(cursor.x, cursor.y));
+
+				var steering;
+				if (distanceToPredator < 90) {
+					steering = Steerings.flee(agentsData[i], cursor);
+				} else {
+					steering = getSteering(agentsData[i], marker.getPosition());
+				}
+
+				if (steering == null) {
+					agentsData[i].velocity = vec2.create();
+				} else {
+					update2(agentsData[i], steering, e.deltaTime);
+					// Look where are you going
+					agents[i].setOrientation(Math.atan2(agentsData[i].velocity[1], agentsData[i].velocity[0]));
+					agents[i].setPosition(agentsData[i].pos[0], agentsData[i].pos[1]);
+				}
+			}
+
+			cursorHover.setPosition(cursor.x, cursor.y);
+		});
+
+		function getSteering(obj, coords) {
+			switch (steeringType) {
+				case ARRIVE:
+					return Steerings.arrive(obj, coords);
+				case FLEE:
+					return Steerings.flee(obj, coords);
+				case SEEK:
+					return Steerings.seek(obj, coords);
+			}
+		}
+
+		bootstrap.on("draw", function(e) {
+			drawGrid(e.ctx);
+			marker.draw(e.ctx);
+
+			for (var i = 0; i < NUM_AGENTS; i++) {
+				agents[i].draw(e.ctx);
+			}
+
+			cursorHover.draw(e.ctx);
+		});
+
+		function goTo(x, y) {
+		}
+
+		function drawGrid(ctx) {
+			ctx.fillStyle = "white";
+			ctx.fillRect(0, 0, bootstrap.canvas.width, bootstrap.canvas.height);
+			Grid.draw(ctx, bootstrap.canvas.width, bootstrap.canvas.height);
+		}
+
+		/* This is from the original paper */
+		function updateAgentPosition(obj, agent) {
+			if (vec2.length(obj.velocity) > obj.maxSpeed) {
+				vec2.normalize(obj.velocity);
+				vec2.scale(obj.velocity, obj.maxSpeed);
+			}
+			vec2.add(obj.pos, obj.velocity, obj.pos);
+			agent.setPosition(obj.pos[0], obj.pos[1]);
+
+			// Look where are you going
+			agent.setOrientation(Math.atan2(obj.velocity[1], obj.velocity[0]));
+		}
+
+		function update2(obj, steering, time) {
+			// Update the position and orientation
+			var deltaPos = vec2.create();
+			vec2.scale(obj.velocity, time, deltaPos);
+			vec2.add(deltaPos, obj.pos, obj.pos);
+
+			// 9 orientation += rotation * time
+			// 10
+			// 11 # and the velocity and rotation
+
+			vec2.add(vec2.scale(steering.linear, time), obj.velocity, obj.velocity);
+
+			// 15 # Check for speeding and clip
+			if (vec2.length(obj.velocity) > obj.maxSpeed) {
+				vec2.normalize(obj.velocity);
+				obj.velocity = vec2.scale(obj.velocity, obj.maxSpeed);
+			}
+		}
+
+		var SEEK = 1;
+		var FLEE = 2;
+		var ARRIVE = 3;
+
+		var steeringType = ARRIVE;
+
+	</script>
+</head>
+<body>
+</body>
+</html>

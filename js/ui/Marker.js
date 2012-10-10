@@ -19,6 +19,13 @@ _p.setPosition = function(x, y) {
     this._y = y;
 };
 
+_p.getPosition = function(x, y) {
+    return {
+        x: this._x,
+        y: this._y
+    };
+};
+
 Marker.RED = "#EEA2AD";
 Marker.GREEN = "#A2CD5A";
 Marker.BLUE = "#9AC0CD";
