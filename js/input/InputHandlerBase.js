@@ -11,8 +11,7 @@ function InputHandlerBase(element) {
     EventEmitter.call(this);
 
     // The DOM element
-    this._element = element;
-
+    this._element = null;
     this._moving = false;
     this._lastMoveCoordinates = null;
     this._moveThreshold = 10;
@@ -22,6 +21,17 @@ function InputHandlerBase(element) {
 extend(InputHandlerBase, EventEmitter);
 
 _p = InputHandlerBase.prototype;
+
+_p.attachTo = function(el) {
+    if (this._element) {
+        this._detachEventListeners();
+    }
+
+    this._element = el;
+    if (el) {
+        this._attachDomListeners();
+    }
+};
 
 _p.getMoveTheshold = function() {
     return this._moveThreshold;

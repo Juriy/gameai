@@ -5,7 +5,7 @@
 function Joystick(canvas) {
     EventEmitter.call(this);
 
-    this._ctx = canvas.getContext("2d");
+    this.ctx = canvas.getContext("2d");
 
     // The position of joystic inside the canvas
     this._x = 0;
@@ -69,7 +69,7 @@ _p.getAzimuth = function() {
  * Render the UI of joystick.
  */
 _p.draw = function() {
-    var ctx = this._ctx;
+    var ctx = this.ctx;
     ctx.fillStyle = "lightgreen";
     ctx.strokeStyle = "darkgray";
     ctx.lineWidth = 5;

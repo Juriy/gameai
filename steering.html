@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Movement and Decisions</title>
+
+<!-- utils and events -->
+<script src="js/utils.js"></script>
+<script src="js/EventEmitter.js"></script>
+<script src="js/input/InputHandlerBase.js"></script>
+<script src="js/input/MouseInputHandler.js"></script>
+<script src="js/input/TouchInputHandler.js"></script>
+<script src="js/input/InputHandler.js"></script>
+
+<script src="js/util/Time.js"></script>
+<script src="js/util/Bootstrap.js"></script>
+
+<!-- math utils -->
+<script src="js/gl-matrix.js"></script>
+<script src="js/Rect.js"></script>
+<script src="js/MathUtils.js"></script>
+<script src="js/Graph.js"></script>
+
+<!-- Entities -->
+<script src="js/Map.js"></script>
+
+<!-- <script src="js/Agent.js"></script> -->
+<script src="js/Obstacle.js"></script>
+
+<script src="js/v2/Agent.js"></script>
+
+<!-- UI and graphics -->
+<script src="js/ui/Grid.js"></script>
+<script src="js/ui/Shapes.js"></script>
+<script src="js/ui/Marker.js"></script>
+
+<!-- behaviors -->
+<script src="js/behavior/BehaviorManager.js"></script>
+<script src="js/behavior/SteeringMoveToBehavior.js"></script>
+<script src="js/behavior/SteeringLookAtBehavior.js"></script>
+<script src="js/behavior/WanderBehavior.js"></script>
+<script src="js/behavior/EatBehavior.js"></script>
+<script src="js/behavior/SleepBehavior.js"></script>
+
+<!-- decisions -->
+<script src="js/decisiontree/DecisionTreeNode.js"></script>
+<script src="js/decisiontree/NumericDecisionNode.js"></script>
+<script src="js/decisiontree/ProbabilisticDecisionNode.js"></script>
+<script src="js/decisiontree/SampleActions.js"></script>
+
+
+<script>
+	var dynamicsData;
+
+	var agent = new Agent();
+	var marker = new Marker(100, 100);
+
+	agent.setPosition(220, 220);
+	agent.setOrientation(Math.PI/2 - 0.2);
+
+	var agentData = {
+		pos: agent.getPosition(),
+		velocity: vec2.create(),
+		mass: 1,
+		maxSpeed: 1
+	};
+
+	var bootstrap = new Bootstrap();
+	var cursorHover = new Marker(0, 0, Marker.GREEN);
+
+	bootstrap.input.on("down", function(e) {
+		marker = new Marker(e.x, e.y);
+		goTo(e.x, e.y);
+	});
+
+	bootstrap.on("ready", function() {
+		// goToRandomPoint();
+	});
+
+	bootstrap.on("update", function(e) {
+		// agent.update(e.deltaTime);
+		var coords = bootstrap.input.getCoordinates();
+		seek(agentData, coords);
+
+		agent.setPosition(agentData.pos[0], agentData.pos[1]);
+		console.log(agentData.pos[0] + ":" + agentData.pos[1]);
+
+		cursorHover.setPosition(coords.x, coords.y);
+	});
+
+	bootstrap.on("draw", function(e) {
+		drawGrid(e.ctx);
+		marker.draw(e.ctx);
+		agent.draw(e.ctx);
+		cursorHover.draw(e.ctx);
+	});
+
+	function goTo(x, y) {
+	}
+
+	function drawGrid(ctx) {
+		ctx.fillStyle = "white";
+		ctx.fillRect(0, 0, bootstrap.canvas.width, bootstrap.canvas.height);
+		Grid.draw(ctx, bootstrap.canvas.width, bootstrap.canvas.height);
+	}
+
+/*
+	function goToRandomPoint() {
+		var point = [Math.floor(Math.random()*bootstrap.canvas.width),
+			Math.floor(Math.random()*bootstrap.canvas.height)];
+
+		marker = new Marker(point[0], point[1], Marker.randomColor());
+		agent.stop();
+		goTo(point[0], point[1]);
+	}
+*/
+
+	function seek(obj, target) {
+		var vecTarget = vec2.createFrom(target.x, target.y);
+		// subtract the position from the target to get the vector from the vehicles position to the target.
+		// Normalize it then multiply by max speed to get the maximum velocity from your position to the target.
+		var desiredVelocity = vec2.create();
+		vec2.subtract(vecTarget, obj.pos, desiredVelocity);
+		vec2.normalize(desiredVelocity);
+
+		vec2.scale(desiredVelocity, obj.maxSpeed);
+
+		// subtract velocity from the desired velocity to get the force vector
+		var steeringForce = vec2.create();
+		vec2.subtract(desiredVelocity, obj.velocity, steeringForce);
+
+		//divide the steeringForce by the mass(which makes it the acceleration),
+		// then add it to velocity to get the new velocity
+		vec2.scale(steeringForce, 1/obj.mass);
+		vec2.add(obj.velocity, steeringForce);
+
+		if (vec2.length(obj.velocity) > obj.maxSpeed) {
+			vec2.normalize(obj.velocity);
+			vec2.scale(obj.velocity, obj.maxSpeed);
+		}
+
+		console.log(obj.velocity);
+		vec2.add(obj.pos, obj.velocity);
+	}
+
+</script>
+</head>
+<body></body>
+</html>

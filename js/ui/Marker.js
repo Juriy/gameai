@@ -14,6 +14,11 @@ _p.draw = function(ctx) {
 
 _p.update = function(time) { };
 
+_p.setPosition = function(x, y) {
+    this._x = x;
+    this._y = y;
+};
+
 Marker.RED = "#EEA2AD";
 Marker.GREEN = "#A2CD5A";
 Marker.BLUE = "#9AC0CD";

@@ -5,7 +5,10 @@
 function TouchInputHandler(element) {
     this._lastInteractionCoordinates = null;
     InputHandlerBase.call(this, element);
-    this._attachDomListeners();
+    this._boundOnDownDomEvent = this._onDownDomEvent.bind(this);
+    this._boundOnUpDomEvent = this._onDownDomEvent.bind(this);
+    this._boundOnMoveDomEvent = this._onDownDomEvent.bind(this);
+    this.attachTo(element);
 }
 
 extend(TouchInputHandler, InputHandlerBase);
@@ -14,9 +17,16 @@ _p = TouchInputHandler.prototype;
 
 _p._attachDomListeners = function() {
     var el = this._element;
-    el.addEventListener("touchstart", this._onDownDomEvent.bind(this), false);
-    el.addEventListener("touchend", this._onUpDomEvent.bind(this), false);
-    el.addEventListener("touchmove", this._onMoveDomEvent.bind(this));
+    el.addEventListener("touchstart", this._boundOnDownDomEvent, false);
+    el.addEventListener("touchend", this._boundOnUpDomEvent, false);
+    el.addEventListener("touchmove", this._boundOnMoveDomEvent, false);
+};
+
+_p._detachEventListeners = function() {
+    var el = this._element;
+    el.removeEventListener("touchstart", this._boundOnDownDomEvent, false);
+    el.removeEventListener("touchend", this._boundOnUpDomEvent, false);
+    el.removeEventListener("touchmove", this._boundOnMoveDomEvent, false);
 };
 
 _p._onDownDomEvent = function(e) {

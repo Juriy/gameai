@@ -8,22 +8,45 @@ function MouseInputHandler(element) {
     // We need additional property to track if the
     // mouse is down.
     this._mouseDown = false;
-    this._attachDomListeners();
+
+    this._boundOnDownDomEvent = this._onDownDomEvent.bind(this);
+    this._boundOnUpDomEvent = this._onUpDomEvent.bind(this);
+    this._boundOnMoveDomEvent = this._onMoveDomEvent.bind(this);
+    this._boundOnMouseOut = this._onMouseOut.bind(this);
+
+    this._coords = {x: -1, y: -1};
+
+    this.attachTo(element);
 }
 
 extend(MouseInputHandler, InputHandlerBase);
 
 _p = MouseInputHandler.prototype;
 
+_p.getCoordinates = function() {
+    return this._coords;
+};
+
 /**
  * Attach the listeners to the mouseXXX DOM events
  */
 _p._attachDomListeners = function() {
     var el = this._element;
-    el.addEventListener("mousedown", this._onDownDomEvent.bind(this), false);
-    el.addEventListener("mouseup", this._onUpDomEvent.bind(this), false);
-    el.addEventListener("mousemove", this._onMoveDomEvent.bind(this));
-    el.addEventListener("mouseout", this._onMouseOut.bind(this));
+    el.addEventListener("mousedown", this._boundOnDownDomEvent, false);
+    el.addEventListener("mouseup", this._boundOnUpDomEvent, false);
+    el.addEventListener("mousemove", this._boundOnMoveDomEvent, false);
+    el.addEventListener("mouseout", this._boundOnMouseOut, false);
+};
+
+/**
+ * Attach the listeners to the mouseXXX DOM events
+ */
+_p._detachDomListeners = function() {
+    var el = this._element;
+    el.removeEventListener("mousedown", this._boundOnDownDomEvent, false);
+    el.removeEventListener("mouseup", this._boundOnUpDomEvent, false);
+    el.removeEventListener("mousemove", this._boundOnMoveDomEvent, false);
+    el.removeEventListener("mouseout", this._boundOnMouseOut, false);
 };
 
 /**
@@ -49,6 +72,7 @@ _p._onMoveDomEvent = function(e) {
     if (this._mouseDown) {
         InputHandlerBase.prototype._onMoveDomEvent.call(this, e);
     }
+    this._coords = this._getInputCoordinates(e);
 };
 
 _p._onMouseOut = function() {
