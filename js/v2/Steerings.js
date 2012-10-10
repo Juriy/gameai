@@ -91,5 +91,28 @@ var Steerings = {
 
         steering.angular = 0;
         return steering;
+    },
+
+    /** For reference only, this is from the original paper */
+    massSeek: function(obj, target) {
+        //debugger;
+        var vecTarget = vec2.createFrom(target.x, target.y);
+        // subtract the position from the target to get the vector from the vehicles position to the target.
+        // Normalize it then multiply by max speed to get the maximum velocity from your position to the target.
+        var desiredVelocity = vec2.create();
+        vec2.subtract(vecTarget, obj.pos, desiredVelocity);
+        vec2.normalize(desiredVelocity);
+
+        vec2.scale(desiredVelocity, obj.maxSpeed);
+
+        // subtract velocity from the desired velocity to get the force vector
+        var steeringForce = vec2.create();
+        vec2.subtract(desiredVelocity, obj.velocity, steeringForce);
+
+        //divide the steeringForce by the mass(which makes it the acceleration),
+        // then add it to velocity to get the new velocity
+        vec2.scale(steeringForce, 1/obj.mass);
+
+        vec2.add(obj.velocity, steeringForce, obj.velocity);
     }
 };
