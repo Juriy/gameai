@@ -54,6 +54,11 @@
 	<script>
 		var NUM_AGENTS = 10;
 
+		var leader = new Agent();
+		leader.setColor("#7070CA");
+		leader.setPosition(100, 100);
+		var leaderData = new Kinematics();
+
 		var agentsData = [];
 		var agents = [];
 		for (var i = 0; i < NUM_AGENTS; i++) {
@@ -78,18 +83,27 @@
 			marker = new Marker(e.x, e.y);
 		});
 
-		bootstrap.on("update", function(e) {
+		bootstrap.on("ready", function() {
+			// goToRandomPoint();
+		});
 
+		bootstrap.on("update", function(e) {
 			var cursor = bootstrap.input.getCoordinates();
 
-			for (var i = 0; i < NUM_AGENTS; i++) {
-				var distanceToPredator = vec2.dist(agentsData[i].pos, vec2.createFrom(cursor.x, cursor.y));
+			// Move leader
+			var steering = Steerings.arrive(leaderData, cursor);
+			if (steering == null) {
+				leaderData.velocity = vec2.create();
+				leaderData.rotation = 0;
+			} else {
+				update2(leaderData, steering, e.deltaTime);
+				leader.setPosition(leaderData.pos[0], leaderData.pos[1]);
+				leader.setOrientation(Math.atan2(leaderData.velocity[1], leaderData.velocity[0]));
+			}
 
-				if (distanceToPredator < 90) {
-					steering = Steerings.flee(agentsData[i], cursor);
-				} else {
-					steering = getSteering(agentsData[i], marker.getPosition());
-				}
+			// Move flock
+			for (var i = 0; i < NUM_AGENTS; i++) {
+				steering = Steerings.align(agentsData[i], leader.getOrientation());
 
 				if (steering == null) {
 					agentsData[i].velocity = vec2.create();
@@ -97,9 +111,7 @@
 				} else {
 					update2(agentsData[i], steering, e.deltaTime);
 					agents[i].setPosition(agentsData[i].pos[0], agentsData[i].pos[1]);
-
-					// Look where are you going
-					agents[i].setOrientation(Math.atan2(agentsData[i].velocity[1], agentsData[i].velocity[0]));
+					agents[i].setOrientation(agentsData[i].orientation);
 				}
 			}
 
@@ -119,12 +131,11 @@
 
 		bootstrap.on("draw", function(e) {
 			drawGrid(e.ctx);
-			marker.draw(e.ctx);
-
 			for (var i = 0; i < NUM_AGENTS; i++) {
 				agents[i].draw(e.ctx);
 			}
 
+			leader.draw(e.ctx);
 			cursorHover.draw(e.ctx);
 		});
 

@@ -14,12 +14,20 @@ _p.getPosition = function() {
     return this.pos;
 };
 
+_p.getOrientation = function() {
+    return this.orientation;
+};
+
 _p.setOrientation = function(o) {
     this.orientation = o;
 };
 
+_p.setColor = function(color) {
+    this.color = color;
+};
+
 _p.draw = function(ctx) {
-    Shapes.drawBoid(ctx, this.pos[0], this.pos[1], this.orientation);
+    Shapes.drawBoid(ctx, this.pos[0], this.pos[1], this.orientation, 10, 17, this.color);
 };
 
 _p._drawSteeringVector = function(ctx) {

@@ -20,15 +20,16 @@ var Steerings = {
 
     flee: function(obj, target) {
         // Create the structure to hold our output
-        var steering = {};
+        var steering = {
+            linear: vec2.create(),
+            angular: 0
+        };
 
         // Get the direction to the target
         var vecTarget = vec2.createFrom(target.x, target.y);
 
         // subtract the position from the target to get the vector from the vehicles position to the target.
         // Normalize it then multiply by max speed to get the maximum velocity from your position to the target.
-        steering.linear = vec2.create();
-
         // FLEE is only different in this line
         vec2.subtract(obj.pos, vecTarget, steering.linear);
 
@@ -49,7 +50,8 @@ var Steerings = {
         // 16 # Holds the time over which to achieve target speed
         var timeToTarget = 100;
         var steering = {
-            linear: vec2.create()
+            linear: vec2.create(),
+            angular: 0
         };
 
         // Get the direction to the target
@@ -89,7 +91,69 @@ var Steerings = {
             vec2.scale(steering.linear, obj.maxAcceleration);
         }
 
-        steering.angular = 0;
+        return steering;
+    },
+
+    align: function(obj, orientation) {
+        // 11 # Holds the radius for arriving at the target
+        var targetRadius = 0.05;
+
+        // 14 # Holds the radius for beginning to slow down
+        var slowRadius = 1.2;
+
+        // # Holds the time over which to achieve target speed
+        var timeToTarget = 0.1;
+
+        // 22 # Create the structure to hold our output
+        var steering = {
+            linear: vec2.create(),
+            angular: 0
+        };
+
+        // 25 # Get the naive direction to the target
+        var rotation = orientation - obj.orientation;
+
+
+        while (rotation > Math.PI) {
+            rotation -= Math.PI*2;
+        }
+        while (rotation < -Math.PI) {
+            rotation += Math.PI*2;
+        }
+
+        var rotationSize = Math.abs(rotation);
+
+        //# Check if we are there, return no steering
+        if (rotationSize < targetRadius) {
+            return null;
+        }
+
+        var targetRotation;
+        // # If we are outside the slowRadius, then use
+        // # maximum rotation
+        if (rotationSize > slowRadius) {
+            targetRotation = obj.maxRotation;
+        } else {
+        //42 # Otherwise calculate a scaled rotation
+            targetRotation = obj.maxRotation * rotationSize / slowRadius
+        }
+
+        // 47 # The final target rotation combines
+        // 48 # speed (already in the variable) and direction
+        targetRotation *= rotation / rotationSize;
+
+        // 50
+        // 51 # Acceleration tries to get to the target rotation
+        steering.angular = targetRotation - obj.rotation;
+        steering.angular /= timeToTarget;
+
+        // 56 # Check if the acceleration is too great
+        var angularAcceleration = Math.abs(steering.angular);
+        if (angularAcceleration > obj.maxAngularAcceleration) {
+            steering.angular /= angularAcceleration;
+            steering.angular *= obj.maxAngularAcceleration;
+        }
+
         return steering;
     },
 
