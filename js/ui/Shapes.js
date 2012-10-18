@@ -131,3 +131,115 @@ Shapes.fillPolygon = function(ctx, points) {
     ctx.stroke();
     ctx.restore();
 };
+
+/**
+ * params:
+ * x, y, width, height, radius, tailX, tailY, tailAngle
+ * @param ctx
+ * @param params
+ */
+Shapes.drawSpeechBubble = function(ctx, params) {
+    var ix = params.tailX - (params.tailY - (params.y + params.height))/Math.tan(params.tailAngle);
+    var iy = params.y + params.height;
+
+    var ix1 = ix - 7;
+    var ix2 = ix + 7;
+
+    ctx.beginPath();
+
+    // draw top and top right corner
+    ctx.moveTo(params.x + params.radius, params.y);
+    ctx.arcTo(params.x + params.width, params.y, params.x + params.width, params.y + params.radius, params.radius);
+
+    // draw right side and bottom right corner
+    ctx.arcTo(params.x + params.width,
+                params.y + params.height,
+                params.x + params.width - params.radius,
+                params.y + params.height,
+                params.radius);
+
+    // go to first intersection with the tail
+    ctx.lineTo(ix2, iy);
+    ctx.lineTo(params.tailX, params.tailY);
+    ctx.lineTo(ix1, iy);
+
+    // draw bottom and bottom left corner
+    ctx.arcTo(params.x, params.y + params.height,
+                params.x, params.y + params.height - params.radius,
+                params.radius);
+
+    // draw left and top left corner
+    ctx.arcTo(params.x, params.y, params.x + params.radius, params.y, params.radius);
+    ctx.stroke();
+};
+
+Shapes.drawBubbleWithText = function(ctx, x, y, style, text) {
+    var textBounds = Fonts.getTextBounds(style, text);
+    var radius = 15;
+
+    var width = textBounds.width + radius*2;
+    var height = textBounds.height + radius;
+    ctx.save();
+    ctx.strokeStyle = "#BEBEBE";
+    ctx.lineWidth = 2;
+    Shapes.drawSpeechBubble(ctx, {
+        x: x, y: y,
+        width: width,
+        height: height,
+        radius: radius,
+        tailX: radius + 20,
+        tailY: height + 20,
+        tailAngle: -Math.PI/4});
+    ctx.restore();
+
+    ctx.save();
+    ctx.fillStyle = "#888";
+    ctx.translate(radius, radius/2);
+    Fonts.renderTextLimitWidth(ctx, style, text);
+    ctx.restore();
+};
+
+Shapes.roundedRect = function(ctx, x, y, width, height, radius) {
+    ctx.beginPath();
+
+    // draw top and top right corner
+    ctx.moveTo(x + radius, y);
+    ctx.arcTo(x + width, y, x + width, y + radius, radius);
+
+    // draw right side and bottom right corner
+    ctx.arcTo(x+width,y+height,x+width-radius,y+height,radius);
+
+    // draw bottom and bottom left corner
+    ctx.arcTo(x,y+height,x,y+height-radius,radius);
+
+    // draw left and top left corner
+    ctx.arcTo(x,y,x+radius,y,radius);
+};
+
+
+/**
+ * TODO: Review this one, if it is still needed.
+ */
+Shapes.arrow = function(ctx) {
+    ctx.strokeStyle='rgb(50,50,0)';
+    ctx.fillStyle='rgb(50,50,0)';
+    ctx.lineWidth=2;
+
+    // draw the line for the shaft
+
+    ctx.moveTo(10,30);
+    ctx.lineTo(290,30);
+
+    // draw the top of the arrow head
+    ctx.lineTo(285,28);
+
+    // draw the curve of the back
+    ctx.arcTo(289,30, 285,32,8);
+
+    // draw the bottom of the arrow head
+    ctx.lineTo(290,30);
+
+    // and make it draw
+    ctx.stroke();
+    ctx.fill();
+};

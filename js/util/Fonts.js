@@ -1,12 +1,47 @@
 var Fonts = {
     faces: {},
 
-    renderTextLimitWidth: function(ctx, style, text) {
+    getTextBounds: function(style, text) {
         var face = this.faces[style.face];
         var lines = text.split("\n");
 
         var lineHeight = Math.round(this.pixelsFromPoints(face, style, face.lineHeight));
+        var pointScale = this.pixelsFromPoints(face, style, 1);
 
+        var maxWidth = 0;
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            var extents = this.getTextExtents(face, style, line);
+            var lineWidth = extents.x*pointScale;
+
+            if (lineWidth > maxWidth) {
+                maxWidth = lineWidth;
+            }
+        }
+
+        return {
+            width: maxWidth,
+            height: lineHeight*lines.length
+        }
+    },
+
+    _breakTextIntoBoundedLines: function(ctx, style, text) {
+        var lines = text.split("\n");
+        var result = [];
+    },
+
+    _breakLineIntoBoundedLines: function(ctx, style, line) {
+        var result = [];
+        var lastWordStart = 0;
+        for (var i = 0; i < line.length; i++) {
+
+        }
+    },
+
+    renderTextLimitWidth: function(ctx, style, text) {
+        var face = this.faces[style.face];
+        var lines = text.split("\n");
+        var lineHeight = Math.round(this.pixelsFromPoints(face, style, face.lineHeight));
         var pointScale = this.pixelsFromPoints(face, style, 1);
 
         for (var i = 0; i < lines.length; i++) {
@@ -14,10 +49,7 @@ var Fonts = {
             var extents = this.getTextExtents(face, style, line);
             var lineWidth = extents.x*pointScale;
 
-            if (lineWidth < style.maxWidth) {
-                this.renderLine(ctx, face, style, lines[i]);
-                ctx.translate(0, lineHeight);
-            } else {
+            if (style.maxWidth && lineWidth < style.maxWidth) {
                 var words = line.split(" ");
                 var firstLine = words[0];
                 var j = 1;
@@ -35,6 +67,9 @@ var Fonts = {
                         firstLine += " " + word;
                     }
                 }
+            } else {
+                this.renderLine(ctx, face, style, line);
+                ctx.translate(0, lineHeight);
             }
         }
     },
@@ -167,94 +202,3 @@ var Fonts = {
     }
 
 };
-
-
-
-
-// TRANSFER LATER
-/*
-
-
-
-function speechBubble(ctx, x, y, width, height, radius, tailX, tailY, tailAngle) {
-
-    var ix = tailX - (tailY - (y + height))/Math.tan(tailAngle);
-    var iy = y + height;
-
-    var ix1 = ix - 7;
-    var ix2 = ix + 7;
-
-    ctx.beginPath();
-
-    // draw top and top right corner
-    ctx.moveTo(x + radius, y);
-    ctx.arcTo(x + width, y, x + width, y + radius, radius);
-
-    // draw right side and bottom right corner
-    ctx.arcTo(x+width,y+height,x+width-radius,y+height,radius);
-
-    // go to first intersection with the tail
-    ctx.lineTo(ix2, iy);
-    ctx.lineTo(tailX, tailY);
-    ctx.lineTo(ix1, iy);
-
-    // draw bottom and bottom left corner
-    ctx.arcTo(x,y+height,x,y+height-radius,radius);
-
-    // draw left and top left corner
-    ctx.arcTo(x,y,x+radius,y,radius);
-
-    ctx.stroke();
-
-
-
-    //ctx.moveTo(tailX, tailY);
-    //ctx.lineTo(ix, iy);
-    //ctx.stroke();
-}
-
-
-
-function roundedRect(ctx, x, y, width, height, radius) {
-    ctx.beginPath();
-
-    // draw top and top right corner
-    ctx.moveTo(x + radius, y);
-    ctx.arcTo(x + width, y, x + width, y + radius, radius);
-
-    // draw right side and bottom right corner
-    ctx.arcTo(x+width,y+height,x+width-radius,y+height,radius);
-
-    // draw bottom and bottom left corner
-    ctx.arcTo(x,y+height,x,y+height-radius,radius);
-
-    // draw left and top left corner
-    ctx.arcTo(x,y,x+radius,y,radius);
-}
-
-
-
-function arrow(ctx) {
-    ctx.strokeStyle='rgb(50,50,0)';
-    ctx.fillStyle='rgb(50,50,0)';
-    ctx.lineWidth=2;
-
-    // draw the line for the shaft
-
-    ctx.moveTo(10,30);
-    ctx.lineTo(290,30);
-
-    // draw the top of the arrow head
-    ctx.lineTo(285,28);
-
-    // draw the curve of the back
-    ctx.arcTo(289,30, 285,32,8);
-
-    // draw the bottom of the arrow head
-    ctx.lineTo(290,30);
-
-    // and make it draw
-    ctx.stroke();
-    ctx.fill();
-    ctx.fill();
-}*/
