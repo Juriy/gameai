@@ -173,6 +173,23 @@ Shapes.drawSpeechBubble = function(ctx, params) {
     ctx.stroke();
 };
 
+Shapes.getBubbleWithTextImage = function(style, text) {
+    var textBounds = Fonts.getTextBounds(style, text);
+    var c = document.createElement("canvas");
+    var radius = 15;
+
+    c.width = textBounds.width + radius*2 + 10;
+    c.height = textBounds.height + radius + 50;
+    var ctx = c.getContext("2d");
+
+    ctx.translate(5, 5);
+    Shapes.drawBubbleWithText(ctx, 0, 0, style, text);
+    var imageData = c.toDataURL("image/png");
+    var imageElement = new Image();
+    imageElement.src = imageData;
+    return imageElement;
+};
+
 Shapes.drawBubbleWithText = function(ctx, x, y, style, text) {
     var textBounds = Fonts.getTextBounds(style, text);
     var radius = 15;
@@ -180,20 +197,20 @@ Shapes.drawBubbleWithText = function(ctx, x, y, style, text) {
     var width = textBounds.width + radius*2;
     var height = textBounds.height + radius;
     ctx.save();
-    ctx.strokeStyle = "#BEBEBE";
+    ctx.strokeStyle = "#999999";
     ctx.lineWidth = 2;
     Shapes.drawSpeechBubble(ctx, {
         x: x, y: y,
         width: width,
         height: height,
         radius: radius,
-        tailX: radius + 20,
+        tailX: radius + width*0.1,
         tailY: height + 20,
         tailAngle: -Math.PI/4});
     ctx.restore();
 
     ctx.save();
-    ctx.fillStyle = "#888";
+    ctx.fillStyle = "#777";
     ctx.translate(radius, radius/2);
     Fonts.renderTextLimitWidth(ctx, style, text);
     ctx.restore();

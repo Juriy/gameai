@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>Test</title>
-	<script src="js/util/Fonts.js"></script>
+	<script src="js/ui/Fonts.js"></script>
 	<script src="js/fonts/helvetiker.typeface.js"></script>
 	<!-- <script src="js/fonts/aircut_light.typeface.js"></script> -->
 	<!-- <script src="js/airmole_shaded_regular.typeface.js"></script> -->
@@ -31,9 +31,16 @@
 			
 			ctx.fillStyle = "#CCC";
 
-			ctx.translate(20, 20);
+			ctx.globalAlpha = 0.5;
+			var img = Shapes.getBubbleWithTextImage(style, line1);
 
-			Shapes.drawBubbleWithText(ctx, 0, 0, style, line1);
+			img.onload = function() {
+				ctx.translate(20, 20);
+				ctx.drawImage(img, 0, 0);
+			};
+
+
+			//Shapes.drawBubbleWithText(ctx, 0, 0, style, line1);
 
 
 		}

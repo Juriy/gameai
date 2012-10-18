@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Movement and Decisions</title>
+	<meta charset="utf-8" />
+
+	<!-- utils and events -->
+	<script src="js/utils.js"></script>
+	<script src="js/EventEmitter.js"></script>
+	<script src="js/input/InputHandlerBase.js"></script>
+	<script src="js/input/MouseInputHandler.js"></script>
+	<script src="js/input/TouchInputHandler.js"></script>
+	<script src="js/input/InputHandler.js"></script>
+
+	<script src="js/util/Animator.js"></script>
+
+	<script src="js/util/Time.js"></script>
+	<script src="js/util/Bootstrap.js"></script>
+
+	<!-- math utils -->
+	<script src="js/gl-matrix.js"></script>
+	<script src="js/Rect.js"></script>
+	<script src="js/MathUtils.js"></script>
+	<script src="js/Graph.js"></script>
+
+	<!-- Entities -->
+	<script src="js/Map.js"></script>
+
+	<!-- <script src="js/Agent.js"></script> -->
+	<script src="js/Obstacle.js"></script>
+
+	<script src="js/v2/Agent.js"></script>
+	<script src="js/v2/Steerings.js"></script>
+	<script src="js/v2/Kinematics.js"></script>
+
+	<!-- UI and graphics -->
+	<script src="js/ui/Grid.js"></script>
+	<script src="js/ui/Shapes.js"></script>
+	<script src="js/ui/Marker.js"></script>
+	<script src="js/ui/Fonts.js"></script>
+
+	<!-- behaviors -->
+	<script src="js/behavior/BehaviorManager.js"></script>
+	<script src="js/behavior/SteeringMoveToBehavior.js"></script>
+	<script src="js/behavior/SteeringLookAtBehavior.js"></script>
+	<script src="js/behavior/WanderBehavior.js"></script>
+	<script src="js/behavior/EatBehavior.js"></script>
+	<script src="js/behavior/SleepBehavior.js"></script>
+
+	<!-- decisions -->
+	<script src="js/decisiontree/DecisionTreeNode.js"></script>
+	<script src="js/decisiontree/NumericDecisionNode.js"></script>
+	<script src="js/decisiontree/ProbabilisticDecisionNode.js"></script>
+	<script src="js/decisiontree/SampleActions.js"></script>
+
+	<!-- fonts -->
+	<script src="js/fonts/helvetiker.typeface.js"></script>
+	<script src="js/fonts/aircut_light.typeface.js"></script>
+
+
+	<script>
+
+		var bootstrap = new Bootstrap();
+		var style = {
+			fontStretchPercent: 1,
+			fontSize: 18,
+			letterSpacing: 0,
+			face: "helvetiker",
+			color: "#777777"
+		};
+
+		var bubbles = [
+			Shapes.getBubbleWithTextImage(style, "I just \ndon't know"),
+			Shapes.getBubbleWithTextImage(style, "This"),
+			Shapes.getBubbleWithTextImage(style, "thing"),
+			Shapes.getBubbleWithTextImage(style, "is so...")
+		];
+
+		style.face = "aircut_light";
+		style.fontSize = 50;
+		bubbles[4] = Shapes.getBubbleWithTextImage(style, "STRANGE");
+
+		var currentScene = new Scene1();
+
+		function Scene1() {
+			this.animator = new Animator(800);
+			this.animator.setRepeatCount(6);
+			this.animator.setRepeatBehavior(Animator.RepeatBehavior.REVERSE);
+			this.animator.setAcceleration(0.85);
+			this.animator.setDeceleration(0.15);
+			this.animator.start();
+
+			this.startSize = 0.7;
+			this.endSize = 1.3;
+			this.startAngle = -Math.PI/4;
+			this.endAngle = Math.PI/8;
+
+			this.img = bubbles[0];
+			this.size = 0;
+			this.angle = 0;
+			this.alpha = 0;
+
+			var it = this;
+			setTimeout(function() {
+				it.animator = new Animator(800);
+				it.animator.setRepeatCount(1);
+				it.animator.setAcceleration(1);
+				it.startAngle = it.angle;
+				it.endAngle = Math.PI/8;
+
+				it.startSize = it.size;
+				it.endSize = 0;
+
+				it.animator.start();
+
+				setTimeout(function () {
+					currentScene = new Scene2(0);
+				}, 1000)
+			}, 4500);
+
+		}
+
+		var _p = Scene1.prototype;
+
+		_p.update = function(e) {
+			var fraction = this.animator.update(e.deltaTime);
+			this.size = (1 - fraction)*this.startSize + fraction*this.endSize;
+			this.angle = (1 - fraction)*this.startAngle + fraction*this.endAngle;
+			this.alpha = (1 - fraction)*0.3 + fraction*0.7;
+
+		};
+
+		_p.draw = function(e) {
+			e.ctx.save();
+			e.ctx.globalAlpha = this.alpha;
+			e.ctx.translate(100, 100);
+			e.ctx.rotate(this.angle);
+			e.ctx.scale(this.size, this.size);
+			e.ctx.drawImage(this.img, 150 - 70*this.size, 150 - 100*this.size);
+			e.ctx.restore();
+		};
+
+		var pos = [
+			[100, 100],
+			[30, 300],
+			[200, 70]
+		];
+		// SCENE 2
+		function Scene2(count) {
+			this.animator = new Animator(1200);
+			this.animator.setRepeatCount(1);
+			this.animator.setRepeatBehavior(Animator.RepeatBehavior.REVERSE);
+			this.animator.setAcceleration(0.3);
+			this.animator.setDeceleration(0.5);
+			this.animator.start();
+
+			this.startSize = 0.7;
+			this.endSize = 1.7;
+			this.x = pos[count][0];
+			this.y = pos[count][1];
+
+			this.img = bubbles[1 + count];
+			this.size = 0;
+			this.angle = 0;
+			this.alpha = 0;
+
+			if (count < 2) {
+				setTimeout(function() {currentScene = new Scene2(count + 1);}, 1200);
+			} else {
+				setTimeout(function() {currentScene = new Scene3();}, 1200);
+			}
+		}
+
+		_p = Scene2.prototype;
+
+		_p.update = function(e) {
+			var fraction = this.animator.update(e.deltaTime);
+			this.size = (1 - fraction)*this.startSize + fraction*this.endSize;
+			this.alpha = (1 - fraction);
+		};
+
+		_p.draw = function(e) {
+			e.ctx.save();
+			e.ctx.globalAlpha = this.alpha;
+			e.ctx.translate(this.x, this.y);
+			e.ctx.scale(this.size, this.size);
+			e.ctx.drawImage(this.img, 150 - 70*this.size, 150 - 100*this.size);
+			e.ctx.restore();
+		};
+
+		// SCENE 3
+		function Scene3() {
+			this.animator = new Animator(1000);
+			this.animator.setRepeatCount(1);
+			this.animator.setRepeatBehavior(Animator.RepeatBehavior.REVERSE);
+			this.animator.setAcceleration(1);
+			this.animator.setDeceleration(0);
+			this.animator.start();
+
+			this.startSize = 3;
+			this.endSize = 1;
+			this.x = 80;
+			this.y = 100;
+
+			this.img = bubbles[4];
+			this.size = 0;
+			this.alpha = 0;
+		}
+
+		_p = Scene3.prototype;
+
+		_p.update = function(e) {
+			var fraction = this.animator.update(e.deltaTime) || 1;
+			this.size = (1 - fraction)*this.startSize + fraction*this.endSize;
+			this.alpha = fraction;
+		};
+
+		_p.draw = function(e) {
+			e.ctx.save();
+			e.ctx.globalAlpha = this.alpha;
+			e.ctx.translate(this.x, this.y);
+			e.ctx.scale(this.size, this.size);
+			e.ctx.drawImage(this.img, 150 - 70*this.size, 150 - 100*this.size);
+			e.ctx.restore();
+		};
+
+		bootstrap.on("update", function(e) {
+			currentScene.update(e);
+		});
+
+		bootstrap.on("draw", function(e) {
+			drawGrid(e.ctx);
+			currentScene.draw(e);
+		});
+
+		function drawGrid(ctx) {
+			ctx.fillStyle = "white";
+			ctx.fillRect(0, 0, bootstrap.canvas.width, bootstrap.canvas.height);
+			Grid.draw(ctx, bootstrap.canvas.width, bootstrap.canvas.height);
+		}
+	</script>
+</head>
+<body>
+</body>
+</html>
