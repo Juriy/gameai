@@ -23,6 +23,10 @@ extend(MouseInputHandler, InputHandlerBase);
 
 _p = MouseInputHandler.prototype;
 
+_p.isDown = function() {
+    return this._mouseDown;
+};
+
 _p.getCoordinates = function() {
     return this._coords;
 };

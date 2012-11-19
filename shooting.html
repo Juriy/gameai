@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Movement and Decisions</title>
+<meta charset="utf-8" />
+
+<!-- utils and events -->
+<script src="js/utils.js"></script>
+<script src="js/EventEmitter.js"></script>
+<script src="js/input/InputHandlerBase.js"></script>
+<script src="js/input/MouseInputHandler.js"></script>
+<script src="js/input/TouchInputHandler.js"></script>
+<script src="js/input/KeyboardHandler.js"></script>
+<script src="js/input/InputHandler.js"></script>
+
+<script src="js/util/Animator.js"></script>
+
+<script src="js/util/Time.js"></script>
+<script src="js/util/Bootstrap.js"></script>
+
+<!-- math utils -->
+<script src="js/gl-matrix.js"></script>
+<script src="js/Rect.js"></script>
+<script src="js/MathUtils.js"></script>
+<script src="js/Graph.js"></script>
+
+<!-- Entities -->
+<script src="js/Map.js"></script>
+
+<!-- <script src="js/Agent.js"></script> -->
+<script src="js/Obstacle.js"></script>
+
+<script src="js/v2/Agent.js"></script>
+<script src="js/v2/Steerings.js"></script>
+<script src="js/v2/Kinematics.js"></script>
+
+<!-- UI and graphics -->
+<script src="js/ui/Grid.js"></script>
+<script src="js/ui/Shapes.js"></script>
+<script src="js/ui/Marker.js"></script>
+<script src="js/ui/Fonts.js"></script>
+
+<!-- behaviors -->
+<script src="js/behavior/BehaviorManager.js"></script>
+<script src="js/behavior/SteeringMoveToBehavior.js"></script>
+<script src="js/behavior/SteeringLookAtBehavior.js"></script>
+<script src="js/behavior/WanderBehavior.js"></script>
+<script src="js/behavior/EatBehavior.js"></script>
+<script src="js/behavior/SleepBehavior.js"></script>
+
+<!-- decisions -->
+<script src="js/decisiontree/DecisionTreeNode.js"></script>
+<script src="js/decisiontree/NumericDecisionNode.js"></script>
+<script src="js/decisiontree/ProbabilisticDecisionNode.js"></script>
+<script src="js/decisiontree/SampleActions.js"></script>
+
+<!-- fonts -->
+<script src="js/fonts/helvetiker.typeface.js"></script>
+<script src="js/fonts/aircut_light.typeface.js"></script>
+
+
+<script>
+
+	var bootstrap = new Bootstrap();
+	var agent = new Agent();
+	agent.setPosition(100, 100);
+
+	var keys = new KeyboardHandler();
+
+	function ShotTrace(x, y, direction) {
+		this.x = x;
+		this.y = y;
+		this.direction = direction;
+		this.start = Date.now();
+		this.duration = 400;
+
+		this.animator = new Animator(100);
+		this.animator.setRepeatCount(1);
+		this.animator.setAcceleration(1);
+		this.animator.start();
+
+		this.traceAnimator = new Animator(2000);
+		this.traceAnimator.setRepeatCount(1);
+		this.traceAnimator.setDeceleration(1);
+		this.traceAnimator.start();
+
+		this.trace = Math.random() > 0.7;
+
+		this.size = 20;
+		this.traceAlpha = 0.7;
+
+	}
+
+	var _p = ShotTrace.prototype;
+
+	_p.update = function(e) {
+		var fraction = this.animator.update(e.deltaTime);
+		this.size = (1 - fraction)*20 + fraction*200;
+
+		fraction = this.traceAnimator.update(e.deltaTime);
+		this.traceAlpha = (1 - fraction)*0.7;
+	};
+
+	_p.draw = function(ctx) {
+		var elapsed = Date.now() - this.start;
+		if (elapsed > 2000) {
+			return;
+		}
+
+		var cos = Math.cos(this.direction);
+		var sin = Math.sin(this.direction);
+
+		ctx.save();
+
+		if (this.trace) {
+			// trace
+			ctx.globalAlpha = this.traceAlpha;
+			ctx.strokeStyle = "lightgray";
+			ctx.lineWidth = 2;
+			ctx.globalAlpha = this.traceAlpha;
+			var traceLength = this.size || 200;
+
+			ctx.beginPath();
+			ctx.moveTo(this.x + cos*20, this.y + sin*20);
+			ctx.lineTo(this.x + cos*traceLength, this.y + sin*traceLength);
+			ctx.stroke();
+		}
+
+		// trace
+		ctx.lineWidth = 4;
+		ctx.strokeStyle = "#444";
+		ctx.globalAlpha = 1;
+		ctx.beginPath();
+		// bullet
+		ctx.moveTo(this.x + cos*(this.size - 5), this.y + sin*(this.size - 5));
+		ctx.lineTo(this.x + cos*this.size, this.y + sin*this.size);
+		ctx.stroke();
+		ctx.restore();
+	};
+
+	var shots = [];
+
+	bootstrap.input.on("down", function (e) {
+		shoot();
+	});
+
+	function shoot() {
+		var pos = agent.getPosition();
+		shots.push(new ShotTrace(pos[0], pos[1], agent.getOrientation() + (Math.random() - Math.random())*Math.PI/20));
+	}
+
+	bootstrap.on("ready", function() {
+		keys.attachTo(window);
+	});
+
+
+	var timeBetweenShots = 150;
+	var lastShot = 0;
+
+	bootstrap.on("update", function(e) {
+		var pos = agent.getPosition();
+		if (keys.isPressed(KeyboardHandler.KEY_A)) {
+			pos[0] -= 0.07*e.deltaTime;
+		}
+		if (keys.isPressed(KeyboardHandler.KEY_D)) {
+			pos[0] += 0.07*e.deltaTime;
+		}
+		if (keys.isPressed(KeyboardHandler.KEY_W)) {
+			pos[1] -= 0.07*e.deltaTime;
+		}
+		if (keys.isPressed(KeyboardHandler.KEY_S)) {
+			pos[1] += 0.07*e.deltaTime;
+		}
+
+		var pointer = bootstrap.input.getCoordinates();
+		agent.setOrientation(Math.atan2(pointer.y - pos[1], pointer.x - pos[0]));
+
+		for (var i = 0; i < shots.length; i++) {
+			shots[i].update(e);
+		}
+
+		if (bootstrap.input.isDown()) {
+			if (Date.now() - lastShot > timeBetweenShots) {
+				lastShot = Date.now();
+				shoot();
+			}
+		}
+
+	});
+
+	bootstrap.on("draw", function(e) {
+		drawGrid(e.ctx);
+		agent.draw(e.ctx);
+
+		e.ctx.save();
+		for (var i = 0; i < shots.length; i++) {
+			shots[i].draw(e.ctx);
+		}
+		e.ctx.restore();
+	});
+
+	function drawGrid(ctx) {
+		ctx.fillStyle = "white";
+		ctx.fillRect(0, 0, bootstrap.canvas.width, bootstrap.canvas.height);
+		Grid.draw(ctx, bootstrap.canvas.width, bootstrap.canvas.height);
+	}
+</script>
+</head>
+<body>
+</body>
+</html>
