@@ -157,6 +157,42 @@ var Steerings = {
         return steering;
     },
 
+	matchVelocity: function(obj, targetVelocity) {
+		// Holds the time over which to achieve target speed
+		var timeToTarget = 100;
+
+		var steering = {
+			linear: vec2.create(),
+			angular: 0
+		};
+
+		vec2.subtract(targetVelocity, obj.velocity, steering.linear);
+		vec2.scale(steering.linear, 1/timeToTarget);
+		if (vec2.length(steering.linear) > obj.maxAcceleration) {
+			vec2.normalize(steering.linear);
+			vec2.scale(steering.linear, obj.maxAcceleration);
+		}
+
+		return steering;
+	},
+
+	blend: function(steerings, weights) {
+		var result = {
+			linear: vec2.create(),
+			angular: 0
+		};
+
+		var i;
+		for (i = 0; i < steerings.length; i++) {
+			if (steerings[i] == null)
+				continue;
+			vec2.add(result.linear, vec2.scale(steerings[i].linear, weights[i]), result.linear);
+			result.angular += steerings[i].angular*weights[i];
+		}
+
+		return result;
+	},
+
     /** For reference only, this is from the original paper */
     massSeek: function(obj, target) {
         //debugger;

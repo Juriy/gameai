@@ -103,6 +103,25 @@
 
 			// Move flock
 			for (var i = 0; i < NUM_AGENTS; i++) {
+				var matchVelocity = Steerings.matchVelocity(agentsData[i], leaderData.velocity);
+				var align = Steerings.align(agentsData[i], leader.getOrientation());
+
+				steering = Steerings.blend([matchVelocity, align], [1, 1]);
+
+				console.log(steering.angular);
+
+				/*if (steering == null) {
+					agentsData[i].velocity = vec2.create();
+					agentsData[i].rotation = 0;
+				} else {*/
+					update2(agentsData[i], steering, e.deltaTime);
+					agents[i].setPosition(agentsData[i].pos[0], agentsData[i].pos[1]);
+					agents[i].setOrientation(agentsData[i].orientation);
+				//}
+			}
+
+/*
+			for (var i = 0; i < NUM_AGENTS; i++) {
 				steering = Steerings.align(agentsData[i], leader.getOrientation());
 
 				if (steering == null) {
@@ -114,20 +133,10 @@
 					agents[i].setOrientation(agentsData[i].orientation);
 				}
 			}
+*/
 
 			cursorHover.setPosition(cursor.x, cursor.y);
 		});
-
-		function getSteering(obj, coords) {
-			switch (steeringType) {
-				case ARRIVE:
-					return Steerings.arrive(obj, coords);
-				case FLEE:
-					return Steerings.flee(obj, coords);
-				case SEEK:
-					return Steerings.seek(obj, coords);
-			}
-		}
 
 		bootstrap.on("draw", function(e) {
 			drawGrid(e.ctx);
