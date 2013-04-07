@@ -13,6 +13,7 @@ function extend(subConstructor, superConstructor) {
             configurable: true
         }
     });
+    return subConstructor.prototype;
 }
 
 /**
