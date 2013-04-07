@@ -75,8 +75,10 @@ _p._onUpDomEvent = function(e) {
 _p._onMoveDomEvent = function(e) {
     if (this._mouseDown) {
         InputHandlerBase.prototype._onMoveDomEvent.call(this, e);
+    } else {
+        InputHandlerBase.prototype._onHoverDomEvent.call(this, e);
     }
-    this._coords = this._getInputCoordinates(e);
+
 };
 
 _p._onMouseOut = function() {
