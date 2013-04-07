@@ -24,7 +24,7 @@ _p = InputHandlerBase.prototype;
 
 _p.attachTo = function(el) {
     if (this._element) {
-        this._detachEventListeners();
+        this._detachDomListeners();
     }
 
     this._element = el;
