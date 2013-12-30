@@ -5,7 +5,7 @@
   	"name" : "Juriy Bura", 
   	"email" : "juriy.bura@gmail.com", 
   	"url" : "http://juriy.com/"
-  }
+  },
 
   "devDependencies": {
     "grunt": "~0.4.1",
