@@ -76,9 +76,22 @@ _p._onMoveDomEvent = function(e) {
     if (this._mouseDown) {
         InputHandlerBase.prototype._onMoveDomEvent.call(this, e);
     } else {
-        InputHandlerBase.prototype._onHoverDomEvent.call(this, e);
+        this._onHoverDomEvent(e);
     }
+};
 
+/**
+ * Hover is for pointer-enabled interfaces. Should rename
+ * move -> drag
+ * hover -> move
+ *
+ * TODO: support deltas in hover
+ */
+_p._onHoverDomEvent = function(e) {
+    var coords = this._coords = this._getInputCoordinates(e);
+    this.emit("hover", {x: coords.x, y: coords.y,
+        /*deltaX: deltaX, deltaY: deltaY,*/ domEvent: e});
+    this._stopEventIfRequired(e);
 };
 
 _p._onMouseOut = function() {

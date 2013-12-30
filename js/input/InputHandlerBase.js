@@ -112,20 +112,6 @@ _p._onMoveDomEvent = function(e) {
     this._stopEventIfRequired(e);
 };
 
-/**
- * Hover is for pointer-enabled interfaces. Should rename
- * move -> drag
- * hover -> move
- *
- * TODO: support deltas in hover
- */
-_p._onHoverDomEvent = function(e) {
-    var coords = this._getInputCoordinates(e);
-    this.emit("hover", {x: coords.x, y: coords.y,
-        /*deltaX: deltaX, deltaY: deltaY,*/ domEvent: e});
-    this._stopEventIfRequired(e);
-};
-
 _p._stopEventIfRequired = function(e) {
     if (this._stopDomEvents) {
         e.stopPropagation();
