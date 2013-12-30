@@ -3,53 +3,7 @@
 <head>
 	<title>Movement and Decisions</title>
 	<meta charset="utf-8" />
-
-	<!-- utils and events -->
-	<script src="js/utils.js"></script>
-	<script src="js/EventEmitter.js"></script>
-	<script src="js/input/InputHandlerBase.js"></script>
-	<script src="js/input/MouseInputHandler.js"></script>
-	<script src="js/input/TouchInputHandler.js"></script>
-	<script src="js/input/InputHandler.js"></script>
-
-	<script src="js/util/Time.js"></script>
-	<script src="js/util/Bootstrap.js"></script>
-
-	<!-- math utils -->
-	<script src="js/gl-matrix.js"></script>
-	<script src="js/Rect.js"></script>
-	<script src="js/MathUtils.js"></script>
-	<script src="js/Graph.js"></script>
-
-	<!-- Entities -->
-	<script src="js/Map.js"></script>
-
-	<!-- <script src="js/Agent.js"></script> -->
-	<script src="js/Obstacle.js"></script>
-
-	<script src="js/v2/Agent.js"></script>
-	<script src="js/v2/Steerings.js"></script>
-	<script src="js/v2/Kinematics.js"></script>
-
-	<!-- UI and graphics -->
-	<script src="js/ui/Grid.js"></script>
-	<script src="js/ui/Shapes.js"></script>
-	<script src="js/ui/Marker.js"></script>
-
-	<!-- behaviors -->
-	<script src="js/behavior/BehaviorManager.js"></script>
-	<script src="js/behavior/SteeringMoveToBehavior.js"></script>
-	<script src="js/behavior/SteeringLookAtBehavior.js"></script>
-	<script src="js/behavior/WanderBehavior.js"></script>
-	<script src="js/behavior/EatBehavior.js"></script>
-	<script src="js/behavior/SleepBehavior.js"></script>
-
-	<!-- decisions -->
-	<script src="js/decisiontree/DecisionTreeNode.js"></script>
-	<script src="js/decisiontree/NumericDecisionNode.js"></script>
-	<script src="js/decisiontree/ProbabilisticDecisionNode.js"></script>
-	<script src="js/decisiontree/SampleActions.js"></script>
-
+	<script src="../build/gameai_0.0.1.min.js"></script>
 
 	<script>
 		var NUM_AGENTS = 10;
@@ -107,8 +61,6 @@
 				var align = Steerings.align(agentsData[i], leader.getOrientation());
 
 				steering = Steerings.blend([matchVelocity, align], [1, 1]);
-
-				console.log(steering.angular);
 
 				/*if (steering == null) {
 					agentsData[i].velocity = vec2.create();
