@@ -35,6 +35,9 @@ module.exports = function(grunt) {
     "js/ui/Shapes.js",
     "js/ui/Marker.js",
 
+    // UI and effects
+    "js/ui/Filters.js",
+
     // Behavior
     "js/behavior/BehaviorManager.js",
     "js/behavior/SteeringMoveToBehavior.js",
