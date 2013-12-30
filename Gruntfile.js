@@ -4,11 +4,16 @@ module.exports = function(grunt) {
     // Core
     "js/utils.js",
     "js/EventEmitter.js",
+    "js/util/Time.js",
+    "js/util/Animator.js",
+    "js/gl-matrix.js",
+
     
     // Input
     "js/input/InputHandlerBase.js",
     "js/input/MouseInputHandler.js",
     "js/input/TouchInputHandler.js",
+    "js/input/KeyboardHandler.js",
     "js/input/InputHandler.js",
 
     "js/util/Bootstrap.js",
@@ -51,13 +56,17 @@ module.exports = function(grunt) {
     uglify: {
       options: {
         mangle: false,
-        banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+        banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
+        sourceMap: "build/<%= pkg.name %>_<%= pkg.version %>.map",
+        sourceMappingURL: "<%= pkg.name %>_<%= pkg.version %>.map",
+        sourceMapRoot: "/"
       },
 
       target_1: {
         files: {
           'build/<%= pkg.name %>_<%= pkg.version %>.min.js': files
-        }
+        },
+        
       }
     }
   });
