@@ -1,0 +1,16 @@
+{
+  "name": "gameai",
+  "version": "0.0.1", 
+  "author": { 
+  	"name" : "Juriy Bura", 
+  	"email" : "juriy.bura@gmail.com", 
+  	"url" : "http://juriy.com/"
+  }
+
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-uglify": "~0.2.2",
+    "grunt-contrib-jshint": "~0.6.0",
+    "grunt-contrib-nodeunit": "~0.2.0"
+  }
+}
