@@ -56,7 +56,7 @@ module.exports = function(grunt) {
 
       target_1: {
         files: {
-          'build/<%= pkg.name %>.min.js': files
+          'build/<%= pkg.name %>_<%= pkg.version %>.min.js': files
         }
       }
     }
