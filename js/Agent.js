@@ -92,7 +92,7 @@ _p.update = function(time) {
         vec2.scale(this.velocity, this.maxLinearVelocity);
     }
 
-    //console.log(this.rotation*time);
+    //console.log(this.rotation*frameTime);
     this.orientation += this.rotation*time;
     this.rotation += this.angularSteering;
 

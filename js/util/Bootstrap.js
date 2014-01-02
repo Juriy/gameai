@@ -1,53 +1,152 @@
-function Bootstrap(canvas) {
-    EventEmitter.call(this);
-    this.time = new Time();
-    this.canvas = canvas;
-    this.ctx = null;
-    var it = this;
+/**
+ * opts: {
+ *   canvas: html element or id (as string),
+ *   inputHandler: instance of input handler or null, if no input should be supported
+ * }
+ * @param opts
+ * @constructor
+ */
+function Bootstrap(opts) {
+  EventEmitter.call(this);
+  this._frameTimer = new Timer();
+  this._runTimer = new Timer();
+  this._gameTimer = new Timer();
 
-    this.input = new InputHandler(canvas);
-    this._animate = this._animate.bind(this);
+  // Bound functions
+  this._animate = this._animate.bind(this);
 
-    var onLoaded = function() {
-        if ( document.addEventListener ) {
-            document.removeEventListener( "DOMContentLoaded", onLoaded, false );
-            it._run();
-        }
-    };
+  this._options = Bootstrap._normalizeOptions(opts);
+  if (!this._options.canvas) {
+    throw "No canvas to attach engine to";
+  }
 
-    if (document.readyState === "complete") {
-        setTimeout( function() {it._run()}, 1);
-    } else if ( document.addEventListener ) {
-        document.addEventListener( "DOMContentLoaded", onLoaded, false);
-    } else {
-        throw "browser not supported";
-    }
+  // Init canvas
+  this.canvas = this._options.canvas;
+  this.ctx = this.canvas.getContext("2d");
+  this.width = this.canvas.width;
+  this.height = this.canvas.height;
+
+  if (this._options.clear === "once") {
+    this.ctx.fillStyle = this._options.clearColor;
+    this.ctx.fillRect(0, 0, this.width, this.height);
+  }
+
+  this._clearFrame = this._options.clear === "frame";
+
+  // Init input
+  this.input = new this._options.inputHandler(this.canvas);
+
+  this.emit("ready", {});
+  this._frameTimer.reset();
+  this._animate();
 }
 
 extend(Bootstrap, EventEmitter);
 _p = Bootstrap.prototype;
 
-_p._run = function() {
-    if (!this.canvas) {
-        this.canvas = document.createElement("canvas");
-        this.canvas.width = "500";
-        this.canvas.height = "500";
-        document.getElementsByTagName("body")[0].appendChild(this.canvas);
-    } else if (typeof this.canvas === "string") {
-        this.canvas = document.getElementById(this.canvas);
+
+/**
+ * Takes whatever is passed as the parameter to the constructor
+ * and makes options "normal" - fills values with defaults, etc.
+ * @param opts
+ * @private
+ */
+Bootstrap._normalizeOptions = function(opts) {
+  // defaults
+  var noop = function(){};
+  var normalOpts = {
+    animated: true,
+    inputHandler: InputHandler,
+    update: noop,
+    draw: noop,
+    clearColor: "white",
+    clear: "frame"
+  };
+
+  if (opts.canvas) {
+    _.assign(normalOpts, opts);
+  }
+
+  normalOpts.canvas = Bootstrap._getCanvas(opts.canvas || opts);
+
+  return normalOpts;
+};
+
+
+/**
+ * Returns the canvas, from string or object. Returns null if not found
+ * and object is not a canvas
+ * @private
+ */
+Bootstrap._getCanvas = function(canvas) {
+  if (typeof canvas === "string") {
+    return Bootstrap._getCanvasByString(canvas);
+  } else if (Bootstrap._isCanvas(canvas)) {
+    return canvas;
+  } else {
+    return null;
+  }
+};
+
+/**
+ *
+ * @param {string} str
+ * @returns {object} canvas element
+ * @private
+ */
+Bootstrap._getCanvasByString = function(str) {
+  var el = document.getElementById(str);
+  if (el && Bootstrap._isCanvas(el)) {
+    return el;
+  }
+
+  if (typeof document.querySelector === "function") {
+    el = document.querySelector(str);
+    if (el && Bootstrap._isCanvas(el)) {
+      return el;
     }
-    this.ctx = this.canvas.getContext("2d");
-    this.input.attachTo(this.canvas);
-    this.emit("ready", {});
-    this.time.tick();
-    this._animate();
+  }
+
+  return null;
+};
+
+Bootstrap._isCanvas = function(obj) {
+  return obj instanceof HTMLCanvasElement;
+};
+
+/**
+ *
+ * @param width
+ * @param height
+ * @returns {*}
+ */
+Bootstrap.createCanvas = function(width, height) {
+  var canvas = document.createElement("canvas");
+  canvas.width = width || 640;
+  canvas.height = height || 480;
+  return canvas;
 };
 
 _p._animate = function() {
-    var deltaTime = this.time.elapsed();
-    this.time.tick();
-    requestAnimationFrame(this._animate);
+  var deltaTime = this._frameTimer.elapsed();
+  var ctx = this.ctx;
+  this._frameTimer.reset();
+  requestAnimationFrame(this._animate);
 
-    this.emit("update", {deltaTime: deltaTime});
-    this.emit("draw", {ctx: this.ctx});
+  // Update phase
+  if (this._options.update) {
+    this._options.update(deltaTime);
+  }
+  this.emit("update", {deltaTime: deltaTime});
+
+  // Draw phase
+  if (this._clearFrame) {
+    ctx.fillStyle = this._options.clearColor;
+    ctx.fillRect(0, 0, this.width, this.height);
+  }
+
+  if (this._options.draw) {
+    this._options.draw(ctx);
+  }
+  this.emit("draw", {ctx: ctx});
 };

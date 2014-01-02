@@ -215,9 +215,9 @@ _p._accelerationDecelerationPreprocessor = function(fraction) {
 		if (fraction < this._acceleration) {
 			fraction *= runRate * (fraction / this._acceleration) / 2;
 		} else if (fraction > (1 - this._deceleration)) {
-			// time spent in deceleration portion
+			// frameTime spent in deceleration portion
 			var tdec = fraction - (1 - this._deceleration);
-			// proportion of tdec to total deceleration time
+			// proportion of tdec to total deceleration frameTime
 			var pdec  = tdec / this._deceleration;
 			fraction = runRate * (1 - ( this._acceleration / 2) -
 					this._deceleration + tdec * (2 - pdec) / 2);
@@ -239,7 +239,7 @@ _p._accelerationDecelerationPreprocessor = function(fraction) {
 /**
  * This function should be called by the external timer to update the state
  * of the animator.
- * @param deltaTime - time passed since the last upate. 0 is valid value.
+ * @param deltaTime - frameTime passed since the last upate. 0 is valid value.
  */
 _p.update = function(deltaTime) {
 
@@ -255,7 +255,7 @@ _p.update = function(deltaTime) {
 
 	this._timeSinceLoopStart += deltaTime;
 
-	// If we exceeded the loop time, we must take care of what to do next:
+	// If we exceeded the loop frameTime, we must take care of what to do next:
 	// adjust the direction of the animation, call hook functions etc.
 	if (this._timeSinceLoopStart >= this._duration) {
 

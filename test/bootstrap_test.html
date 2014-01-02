@@ -7,12 +7,53 @@
 </head>
 <body>
 	<div id="qunit"></div>
-	<div id="qunit-fixture"></div>
+	<div id="qunit-fixture">
+		<canvas id="mainCanvas" width="200" height="200"></canvas>
+	</div>
 
 	<script src="qunit/qunit-1.12.0.js"></script>
+
+	<script src="../build/gameai_0.0.1.min.js"></script>
+
 	<script>
-		test("hello test", function() {
-			ok(1 == "1", "Passed!");
+		function realCanvas() {
+			return document.getElementById("mainCanvas");
+		}
+
+		test("get canvas by id", function() {
+			var bs = new Bootstrap("mainCanvas");
+			ok(bs.canvas === realCanvas());
+		});
+
+		test("get canvas by css selector", function() {
+			var bs = new Bootstrap("#mainCanvas");
+			ok(bs.canvas === realCanvas());
+		});
+
+		test("get canvas by DOM element", function() {
+			var bs = new Bootstrap(document.getElementById("mainCanvas"));
+			ok(bs.canvas === realCanvas());
+		});
+
+		test("Parsing options, canvas as string", function() {
+			var bs = new Bootstrap({
+				canvas: "mainCanvas"
+			});
+			ok(bs.canvas === realCanvas());
+		});
+
+		test("Parsing options, canvas as element", function() {
+			var bs = new Bootstrap({
+				canvas: document.getElementById("mainCanvas")
+			});
+			ok(bs.canvas === realCanvas());
+		});
+
+		test("Parsing options, canvas as selector", function() {
+			var bs = new Bootstrap({
+				canvas: "#mainCanvas"
+			});
+			ok(bs.canvas === realCanvas());
 		});
 	</script>
 </body>

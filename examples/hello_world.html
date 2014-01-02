@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+    <meta charset="utf-8" />
+</head>
+
+<body>
+<canvas id="mainCanvas" width="640" height="480"></canvas>
+
+<script src="../vnd/lodash.js"></script>
+<script src="../js/utils.js"></script>
+<script src="../js/EventEmitter.js"></script>
+
+<!-- Input -->
+<script src="../js/input/InputHandlerBase.js"></script>
+<script src="../js/input/MouseInputHandler.js"></script>
+<script src="../js/input/KeyboardHandler.js"></script>
+<script src="../js/input/TouchInputHandler.js"></script>
+<script src="../js/input/InputHandler.js"></script>
+
+<!-- Shapes -->
+<script src="../js/ui/Shapes.js"></script>
+
+<!-- Bootstrap -->
+<script src="../js/util/Timer.js"></script>
+<script src="../js/util/Bootstrap.js"></script>
+
+<!--<script src="../build/gameai_0.0.1.min.js"></script>-->
+
+<script>
+/*
+	var bs = new Bootstrap({
+	  canvas: "mainCanvas",
+		update: update,
+		draw: draw
+  });
+*/
+	var bs = new Bootstrap("#mainCanvas");
+
+
+	var x = 10;
+	var y = 100;
+
+	function update(delta) {
+		x += 0.1*delta;
+	}
+
+	function draw(ctx) {
+		ctx.fillStyle = "#CCC";
+		Shapes.drawBoid(ctx, x, y, 0);
+	}
+</script>
+
+</body>
+</html>

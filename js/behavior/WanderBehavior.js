@@ -37,6 +37,6 @@ _p.applyToAgent = function(time, agent) {
         wanderCircleCenter[1] + this.wanderRadius*Math.sin(wanderOrientation));
 
 
-    //steeringMove.applyToAgent(time, agent);
-    //steeringLook.applyToAgent(time, agent);
+    //steeringMove.applyToAgent(frameTime, agent);
+    //steeringLook.applyToAgent(frameTime, agent);
 };

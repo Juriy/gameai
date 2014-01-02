@@ -22,7 +22,7 @@ _p.update = function (time) {
     /* for (var i = 0; i < this.behaviors.length; i++) {
         var behavior = this.behaviors[i];
         if (behavior) {
-            if (behavior.applyToAgent(time, this.agent)) {
+            if (behavior.applyToAgent(frameTime, this.agent)) {
                 this.behaviors[i] = null;
             }
         }

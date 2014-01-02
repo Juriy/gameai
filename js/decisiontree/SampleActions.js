@@ -1,4 +1,5 @@
 /**
+ * TODO: Remove this from core
  * Eat - reduce hunger
  */
 function EatAction() { }

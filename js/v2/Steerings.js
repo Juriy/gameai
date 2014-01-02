@@ -47,7 +47,7 @@ var Steerings = {
         // 13 # Holds the radius for beginning to slow down
         var slowRadius = 30;
 
-        // 16 # Holds the time over which to achieve target speed
+        // 16 # Holds the frameTime over which to achieve target speed
         var timeToTarget = 100;
         var steering = {
             linear: vec2.create(),
@@ -101,7 +101,7 @@ var Steerings = {
         // 14 # Holds the radius for beginning to slow down
         var slowRadius = 1.2;
 
-        // # Holds the time over which to achieve target speed
+        // # Holds the frameTime over which to achieve target speed
         var timeToTarget = 0.1;
 
         // 22 # Create the structure to hold our output
@@ -158,7 +158,7 @@ var Steerings = {
     },
 
 	matchVelocity: function(obj, targetVelocity) {
-		// Holds the time over which to achieve target speed
+		// Holds the frameTime over which to achieve target speed
 		var timeToTarget = 100;
 
 		var steering = {

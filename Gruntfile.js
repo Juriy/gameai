@@ -1,10 +1,13 @@
 module.exports = function(grunt) {
 
   var files = [
+    // Vendor libs
+    "vnd/lodash.js",
+
     // Core
     "js/utils.js",
     "js/EventEmitter.js",
-    "js/util/Time.js",
+    "js/util/Timer.js",
     "js/util/Animator.js",
     "js/gl-matrix.js",
 
@@ -56,6 +59,7 @@ module.exports = function(grunt) {
   // Project configuration.
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
+
     uglify: {
       options: {
         mangle: false,
@@ -68,16 +72,19 @@ module.exports = function(grunt) {
       target_1: {
         files: {
           'build/<%= pkg.name %>_<%= pkg.version %>.min.js': files
-        },
-        
+        }
       }
+    },
+
+    qunit: {
+      all: ['test/**/*.html']
     }
   });
 
-  // Load the plugin that provides the "uglify" task.
+
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-qunit');
 
-  // Default task(s).
+  // Default tasks.
   grunt.registerTask('default', ['uglify']);
-
 };
