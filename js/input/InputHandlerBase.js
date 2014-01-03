@@ -10,7 +10,7 @@
 function InputHandlerBase(element) {
     EventEmitter.call(this);
 
-    // The DOM element
+    // The DOM element, descendants will set this in attach()
     this._element = null;
     this._moving = false;
     this._lastMoveCoordinates = null;
@@ -21,6 +21,13 @@ function InputHandlerBase(element) {
 extend(InputHandlerBase, EventEmitter);
 
 _p = InputHandlerBase.prototype;
+
+_p.detach = function() {
+  if (this._element) {
+    this._detachDomListeners();
+    this._element = null;
+  }
+};
 
 _p.attachTo = function(el) {
     if (this._element) {

@@ -3,20 +3,21 @@
  * browser based on the mouse events.
  */
 function MouseInputHandler(element) {
-    InputHandlerBase.call(this, element);
+  InputHandlerBase.call(this, element);
 
-    // We need additional property to track if the
-    // mouse is down.
-    this._mouseDown = false;
+  // We need additional property to track if the
+  // mouse is down.
+  this._mouseDown = false;
 
-    this._boundOnDownDomEvent = this._onDownDomEvent.bind(this);
-    this._boundOnUpDomEvent = this._onUpDomEvent.bind(this);
-    this._boundOnMoveDomEvent = this._onMoveDomEvent.bind(this);
-    this._boundOnMouseOut = this._onMouseOut.bind(this);
+  // Bound functions
+  this._onDownDomEvent = this._onDownDomEvent.bind(this);
+  this._onUpDomEvent = this._onUpDomEvent.bind(this);
+  this._onMoveDomEvent = this._onMoveDomEvent.bind(this);
+  this._onMouseOut = this._onMouseOut.bind(this);
+  this._onHoverDomEvent = this._onHoverDomEvent.bind(this);
 
-    this._coords = {x: -1, y: -1};
-
-    this.attachTo(element);
+  this._coords = {x: -1, y: -1};
+  this.attachTo(element);
 }
 
 extend(MouseInputHandler, InputHandlerBase);
@@ -36,10 +37,10 @@ _p.getCoordinates = function() {
  */
 _p._attachDomListeners = function() {
     var el = this._element;
-    el.addEventListener("mousedown", this._boundOnDownDomEvent, false);
-    el.addEventListener("mouseup", this._boundOnUpDomEvent, false);
-    el.addEventListener("mousemove", this._boundOnMoveDomEvent, false);
-    el.addEventListener("mouseout", this._boundOnMouseOut, false);
+    el.addEventListener("mousedown", this._onDownDomEvent, false);
+    el.addEventListener("mouseup", this._onUpDomEvent, false);
+    el.addEventListener("mousemove", this._onMoveDomEvent, false);
+    el.addEventListener("mouseout", this._onMouseOut, false);
 };
 
 /**
@@ -47,10 +48,10 @@ _p._attachDomListeners = function() {
  */
 _p._detachDomListeners = function() {
     var el = this._element;
-    el.removeEventListener("mousedown", this._boundOnDownDomEvent, false);
-    el.removeEventListener("mouseup", this._boundOnUpDomEvent, false);
-    el.removeEventListener("mousemove", this._boundOnMoveDomEvent, false);
-    el.removeEventListener("mouseout", this._boundOnMouseOut, false);
+    el.removeEventListener("mousedown", this._onDownDomEvent, false);
+    el.removeEventListener("mouseup", this._onUpDomEvent, false);
+    el.removeEventListener("mousemove", this._onMoveDomEvent, false);
+    el.removeEventListener("mouseout", this._onMouseOut, false);
 };
 
 /**

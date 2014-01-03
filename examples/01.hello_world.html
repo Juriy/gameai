@@ -29,15 +29,11 @@
 <!--<script src="../build/gameai_0.0.1.min.js"></script>-->
 
 <script>
-/*
 	var bs = new Bootstrap({
 	  canvas: "mainCanvas",
 		update: update,
 		draw: draw
   });
-*/
-	var bs = new Bootstrap("#mainCanvas");
-
 
 	var x = 10;
 	var y = 100;
@@ -47,7 +43,6 @@
 	}
 
 	function draw(ctx) {
-		ctx.fillStyle = "#CCC";
 		Shapes.drawBoid(ctx, x, y, 0);
 	}
 </script>

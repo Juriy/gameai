@@ -1,7 +1,7 @@
 function Game(canvas, map) {
     this._canvas = canvas;
     this._ctx = this._canvas.getContext("2d");
-    this._boundAnimate = this._animate.bind(this);
+    this._boundAnimate = this._gameLoop.bind(this);
 
     this._imageManager = new ImageManager();
     this._dirtyRectangleManager = new DirtyRectangleManager();
@@ -43,7 +43,7 @@ _p._onImagesLoaded = function() {
     inputHandler.on("up", this._onUp.bind(this));
 
     this._clearBg();
-    this._animate();
+    this._gameLoop();
 };
 
 _p._initLayers = function() {
@@ -129,7 +129,7 @@ _p._renderFrame = function() {
     this._ctx.restore();
 };
 
-_p._animate = function() {
+_p._gameLoop = function() {
     requestAnimationFrame(this._boundAnimate);
     this._updateWorld();
     this._renderFrame();
