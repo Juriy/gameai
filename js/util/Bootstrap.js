@@ -30,12 +30,12 @@ function Bootstrap(opts) {
   this.height = this.canvas.height;
   this._isPaused = !this._options.animated;
 
-  if (this._options.clear === "once") {
-    this.ctx.fillStyle = this._options.clearColor;
-    this.ctx.fillRect(0, 0, this.width, this.height);
-  }
+  // lazy check for valid values
+  this.setClear(this._options.clear);
 
-  this._clearFrame = this._options.clear === "frame";
+  if (this._options.clear === "once") {
+    this.clear();
+  }
 
   // Init input
   this.input = new this._options.inputHandler(this.canvas);
@@ -49,11 +49,30 @@ function Bootstrap(opts) {
 extend(Bootstrap, EventEmitter);
 _p = Bootstrap.prototype;
 
-_p.pause = function() {
-  if (this._paused)
-    return;
+_p.clear = function() {
+  this.ctx.fillStyle = this._options.clearColor;
+  this.ctx.fillRect(0, 0, this.width, this.height);
+};
 
-  this._paused = true;
+_p.getClear = function() {
+  return this._options.clear;
+};
+
+_p.setClear = function(clear) {
+  if (["frame", "once", "none"].indexOf(clear) == -1) {
+    throw "clear parameter can only be one of: frame, once, none";
+  }
+
+  this._options.clear = clear;
+  this._clearFrame = clear === "frame";
+};
+
+_p.pause = function() {
+  if (this._isPaused) {
+    return;
+  }
+
+  this._isPaused = true;
   this._frameTimer.pause();
   this._gameTimer.pause();
   cancelAnimationFrame(this._animationRequestId);
@@ -64,6 +83,10 @@ _p.isPaused = function() {
 };
 
 _p.start = function() {
+
+  if (!this._isPaused) {
+    return;
+  }
   this._isPaused = false;
   this._frameTimer.start();
   this._gameTimer.start();
@@ -116,22 +139,26 @@ _p._update = function(deltaTime) {
   if (this._options.update) {
     this._options.update(deltaTime);
   }
-  this.emit("update", {deltaTime: deltaTime});
+  this.emit("update", deltaTime);
 };
 
 _p._draw = function(ctx) {
 
   // Draw phase
   if (this._clearFrame) {
-    ctx.fillStyle = this._options.clearColor;
-    ctx.fillRect(0, 0, this.width, this.height);
+    this.clear();
   }
 
   if (this._options.draw) {
     this._options.draw(ctx);
   }
-  this.emit("draw", {ctx: ctx});
+  this.emit("draw", ctx);
 };
+
+
+Bootstrap.CLEAR_FRAME = "frame";
+Bootstrap.CLEAR_ONCE = "once";
+Bootstrap.CLEAR_NONE = "none";
 
 /**
  *
