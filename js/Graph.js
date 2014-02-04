@@ -137,9 +137,13 @@ _p.findPath = function(startNode, endNode) {
                 openList.push(node);
             }
         });
+       
+	// Remove from open list
+	var index = openList.indexOf(currentNode);
+        if (index != -1){
+            openList.splice(index, 1);
+	}
 
-        // Remove from open list
-        openList.splice(openList.indexOf(currentNode), 1);
         // Add to closed list
         closedList.push(currentNode);
     }
